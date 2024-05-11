@@ -10,7 +10,7 @@ fi
 
 # Optionally rebuild workspace
 if [ "$REBUILD" = true ]; then
-  colcon build
+  colcon build --symlink-install --packages-ignore xavbot_behaviour xavbot_perception xavbot_teleop
   source "./install/setup.bash"
 fi
 

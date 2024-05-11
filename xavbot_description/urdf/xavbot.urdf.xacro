@@ -11,7 +11,7 @@
     <origin xyz="0.17425 0.07 0.193" rpy="0 0 0"/>
   </xacro:sensor_d435i>
   <xacro:sensor_d435i parent="base_link" name="arm_camera" use_nominal_extrinsics="false">
-    <origin xyz="0.173 0.13 0.163" rpy="0 0.7854 0"/>
+    <origin xyz="0.173 0.13 0.163" rpy="0 0.6981 0"/>
   </xacro:sensor_d435i>
 
   <!-- Import xavbot ros2_control description -->

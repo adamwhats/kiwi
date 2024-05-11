@@ -29,9 +29,10 @@ def generate_launch_description():
         ' ',
         PathJoinSubstitution(
             [FindPackageShare('xavbot_description'), 'urdf', 'xavbot.urdf.xacro']),
-        ' arm:=True'
-    ]
+            ' arm:=True'
+        ]
     )
+
     robot_description = {'robot_description': robot_description_content}
 
     robot_controllers = PathJoinSubstitution(
