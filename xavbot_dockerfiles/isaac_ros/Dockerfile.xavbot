@@ -2,10 +2,11 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
 RUN apt-get update && apt-get install -y \
-    ros-$ROS_DISTRO-isaac-ros-visual-slam \
-    ros-$ROS_DISTRO-apriltag-ros \
+    ros-$ROS_DISTRO-apriltag-msgs \
     ros-$ROS_DISTRO-gripper-controllers \
     ros-$ROS_DISTRO-image-transport-plugins \
+    ros-$ROS_DISTRO-isaac-ros-apriltag \
+    ros-$ROS_DISTRO-isaac-ros-visual-slam \
     ros-$ROS_DISTRO-moveit-msgs \
     ros-$ROS_DISTRO-nav2-bringup \
     ros-$ROS_DISTRO-rqt-tf-tree \

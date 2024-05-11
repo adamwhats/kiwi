@@ -1,2 +1,2 @@
 std_msgs/Header header
-apriltag_msgs/AprilTagDetection detection
+isaac_ros_apriltag_interfaces/AprilTagDetection detection

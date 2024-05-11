@@ -13,7 +13,8 @@ echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 source /opt/ros/${ROS_DISTRO}/setup.bash
 
 export FASTRTPS_DEFAULT_PROFILES_FILE=/workspaces/isaac_ros-dev/src/xavbot/FASTRTPS_PROFILE.xml
-echo 'alias bringup=". install/setup.bash && ros2 launch xavbot_bringup xavbot.launch.py"' >> ~/.bash_aliases
+echo 'alias cbsi="colcon build --symlink-install"' >> ~/.bash_aliases
+echo 'alias bringup=". /workspaces/isaac_ros-dev/install/setup.bash && ros2 launch xavbot_bringup xavbot.launch.py"' >> ~/.bash_aliases
 
 # sudo apt-get update
 # rosdep update

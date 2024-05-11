@@ -8,8 +8,8 @@ endif()
 ## DEPENDENCIES
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   ament_cmake
-  apriltag_msgs
   geometry_msgs
+  isaac_ros_apriltag_interfaces
   rosidl_default_generators
 )
 

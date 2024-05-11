@@ -3,7 +3,7 @@ from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from launch.actions import IncludeLaunchDescription
 from launch.actions.execute_process import ExecuteProcess
-from launch.conditions import IfCondition
+from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 
@@ -30,34 +30,19 @@ def generate_launch_description():
     )
 
     # Visual-inertial odometry
+    use_vio = LaunchConfiguration('odom', default=True)
     vio_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            launch_file_path=PathJoinSubstitution([FindPackageShare('xavbot_bringup'), 'launch', 'vio.launch.py']))
+            launch_file_path=PathJoinSubstitution([FindPackageShare('xavbot_bringup'), 'launch', 'vio.launch.py'])
+        ),
+        condition=IfCondition(use_vio)
     )
-
-    # # Arm camera
-    # arm_camera = Node(
-    #     name='arm_camera',
-    #     namespace='arm_camera',
-    #     package='realsense2_camera',
-    #     executable='realsense2_camera_node',
-    #     parameters=[{
-    #             'pointcloud.enable': True,
-    #             'serial_no': '_927522073083',
-    #             'camera_name': 'arm_camera',
-    #             '_image_transport': 'compressed',
-    #     }]
-    # )
-
-    # Perception
-    perception_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            launch_file_path=PathJoinSubstitution([
-                FindPackageShare('xavbot_perception'), 'launch', 'apriltag_manager_test.launch.py']
-            )
-        )
-    )
-
+    dummy_odom_tf = Node(package='tf2_ros',
+                         executable='static_transform_publisher',
+                         arguments=['0', '0', '0', '0', '0', '0', 'map', 'base_link'],
+                         condition=UnlessCondition(use_vio)
+                         )
+    
     # Navigation
     use_nav2 = LaunchConfiguration('navigation', default=True)
     nav2_bringup = IncludeLaunchDescription(
@@ -69,12 +54,22 @@ def generate_launch_description():
         condition=IfCondition(use_nav2)
     )
 
+    # Perception
+    perception_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            launch_file_path=PathJoinSubstitution([
+                FindPackageShare('xavbot_perception'), 'launch', 'arm_perception.launch.py']
+            )
+        )
+    )
+
     actions = [
         xavbot_pi_remote_launch,
         remote_launch_terminator,
-        # vio_launch,
-        perception_launch
-        # nav2_bringup
+        vio_launch,
+        dummy_odom_tf,
+        # nav2_bringup,
+        perception_launch,
     ]
 
     return LaunchDescription(actions)

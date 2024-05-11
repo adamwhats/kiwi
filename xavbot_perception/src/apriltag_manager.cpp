@@ -1,5 +1,5 @@
-#include "apriltag_msgs/msg/april_tag_detection_array.hpp"
-#include "apriltag_msgs/msg/april_tag_detection.hpp"
+#include "isaac_ros_apriltag_interfaces/msg/april_tag_detection_array.hpp"
+#include "isaac_ros_apriltag_interfaces/msg/april_tag_detection.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "std_msgs/msg/header.hpp"
@@ -20,7 +20,7 @@ class AprilTagManager : public rclcpp::Node
 
     AprilTagManager(const rclcpp::NodeOptions& options) : Node("apriltag_manager", options)
     {
-      tag_detection_sub = this->create_subscription<apriltag_msgs::msg::AprilTagDetectionArray>(
+      tag_detection_sub = this->create_subscription<isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray>(
         "/apriltag_detections", 10, std::bind(&AprilTagManager::tag_detection_cb, this, _1));
 
       query_tags_server = rclcpp_action::create_server<QueryAprilTagLog>(
@@ -32,17 +32,17 @@ class AprilTagManager : public rclcpp::Node
     }
 
   private:
-    rclcpp::Subscription<apriltag_msgs::msg::AprilTagDetectionArray>::SharedPtr tag_detection_sub;
+    rclcpp::Subscription<isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray>::SharedPtr tag_detection_sub;
     rclcpp_action::Server<QueryAprilTagLog>::SharedPtr query_tags_server;
     
-    std::map<int, std::tuple<std_msgs::msg::Header, apriltag_msgs::msg::AprilTagDetection>> tag_log;
+    std::map<int, std::tuple<std_msgs::msg::Header, isaac_ros_apriltag_interfaces::msg::AprilTagDetection>> tag_log;
 
-    void tag_detection_cb(const apriltag_msgs::msg::AprilTagDetectionArray & msg)
+    void tag_detection_cb(const isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray & msg)
     {
       // Add/update detections in the tag_log
       for(auto detection : msg.detections)
       {
-        std::tuple<std_msgs::msg::Header, apriltag_msgs::msg::AprilTagDetection> tag_record;
+        std::tuple<std_msgs::msg::Header, isaac_ros_apriltag_interfaces::msg::AprilTagDetection> tag_record;
         tag_record = std::make_tuple(msg.header, detection);
         tag_log[detection.id] = tag_record;
       }

@@ -127,7 +127,7 @@ def generate_launch_description():
         executable='component_container',
         composable_node_descriptions=[
             realsense_camera_node,
-            vio_camera_encoder_node,
+            # vio_camera_encoder_node,
             visual_slam_node
         ],
         output='screen'

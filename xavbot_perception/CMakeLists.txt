@@ -8,7 +8,7 @@ endif()
 ## DEPENDENCIES
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   ament_cmake
-  apriltag_msgs
+  isaac_ros_apriltag_interfaces
   rclcpp
   rclcpp_action
   rclcpp_components
