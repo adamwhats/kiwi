@@ -1,2 +1,3 @@
 std_msgs/Header header
 isaac_ros_apriltag_interfaces/AprilTagDetection detection
+bool reachable

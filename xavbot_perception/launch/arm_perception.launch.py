@@ -12,7 +12,7 @@ def generate_launch_description():
                             parameters=[{
                                 'camera_name': 'arm_camera',
                                 'serial_no': '_927522073083',
-                                'rgb_camera.profile': '1920x1080x6',
+                                'rgb_camera.profile': '1280x720x6',
                                 'depth_module.profile': '640x360x6',
                                 'enable_color': True,
                                 'enable_depth': True,

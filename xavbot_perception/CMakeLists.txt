@@ -8,10 +8,14 @@ endif()
 ## DEPENDENCIES
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   ament_cmake
+  geometry_msgs
   isaac_ros_apriltag_interfaces
   rclcpp
   rclcpp_action
   rclcpp_components
+  std_msgs
+  tf2
+  tf2_ros
   xavbot_interfaces
 )
 

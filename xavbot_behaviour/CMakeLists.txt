@@ -36,7 +36,8 @@ install(TARGETS DrivePlatformServer
 )
 
 install(DIRECTORY
-  launch 
+  launch
+  params
   DESTINATION share/${PROJECT_NAME})
 
 ament_package()

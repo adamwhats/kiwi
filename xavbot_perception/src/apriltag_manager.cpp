@@ -1,8 +1,12 @@
+#include "geometry_msgs/msg/transform_stamped.hpp"
 #include "isaac_ros_apriltag_interfaces/msg/april_tag_detection_array.hpp"
 #include "isaac_ros_apriltag_interfaces/msg/april_tag_detection.hpp"
-#include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
+#include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/header.hpp"
+#include "tf2_ros/buffer.h"
+#include "tf2_ros/transform_listener.h"
+#include "tf2/exceptions.h"
 
 #include "xavbot_interfaces/msg/april_tag_detection_stamped.hpp"
 #include "xavbot_interfaces/action/query_april_tag_log.hpp"
@@ -29,11 +33,19 @@ class AprilTagManager : public rclcpp::Node
         std::bind(&AprilTagManager::handle_goal, this, _1, _2),
         std::bind(&AprilTagManager::handle_cancel, this, _1),
         std::bind(&AprilTagManager::handle_accepted, this, _1));
+
+      arm_base_link = this->declare_parameter<std::string>("arm_base_link", "link0");
+      tf_buffer = std::make_unique<tf2_ros::Buffer>(this->get_clock());
+      tf_listener = std::make_shared<tf2_ros::TransformListener>(*tf_buffer);
     }
 
   private:
     rclcpp::Subscription<isaac_ros_apriltag_interfaces::msg::AprilTagDetectionArray>::SharedPtr tag_detection_sub;
     rclcpp_action::Server<QueryAprilTagLog>::SharedPtr query_tags_server;
+    std::string arm_base_link;
+    std::shared_ptr<tf2_ros::TransformListener> tf_listener{nullptr};
+    std::unique_ptr<tf2_ros::Buffer> tf_buffer;
+
     
     std::map<int, std::tuple<std_msgs::msg::Header, isaac_ros_apriltag_interfaces::msg::AprilTagDetection>> tag_log;
 
@@ -97,7 +109,28 @@ class AprilTagManager : public rclcpp::Node
           xavbot_interfaces::msg::AprilTagDetectionStamped latest_detection;
           latest_detection.header = std::get<0>(tag_log[id]);
           latest_detection.detection = std::get<1>(tag_log[id]);
+          
+
+          // Look up tf
+          std::string tag_frame;
+          tag_frame = std::get<1>(tag_log[id]).family + ":" + std::to_string(id);
+          geometry_msgs::msg::TransformStamped t;
+          try {
+            t = tf_buffer->lookupTransform(arm_base_link.c_str(), tag_frame.c_str(), tf2::TimePointZero);
+            if (-0.2 <= t.transform.translation.x && t.transform.translation.x <= 0
+              && -0.005 <= t.transform.translation.z && t.transform.translation.z <= 0.005) {
+              latest_detection.reachable = true;
+            } else {
+              latest_detection.reachable = false;
+            }
+          } catch (const tf2::TransformException & ex) {
+            RCLCPP_INFO(
+              this->get_logger(), "Could not transform %s to %s: %s",
+              arm_base_link.c_str(), tag_frame.c_str(), ex.what());
+          }
+
           result->detections.push_back(latest_detection);
+
         } else {
           result->failed_tags.push_back(id);
         }
