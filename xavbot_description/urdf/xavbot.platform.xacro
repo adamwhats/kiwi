@@ -3,183 +3,130 @@
 
   <xacro:macro name="xavbot_platform" params="prefix='' mesh_dir='package://xavbot_description/meshes' ">
 
-  <!-- Constants for robot dimensions -->
-  <xacro:property name="PI" value="3.1415926535897931"/>
-  <xacro:property name="base_mass" value="1.0" /> <!-- arbitrary value for base mass -->
-  <xacro:property name="base_width" value="0.25" />
-  <xacro:property name="base_length" value="0.25" />
-  <xacro:property name="base_height" value="0.05" />
-  <xacro:property name="wheel_mass" value="0.02" /> <!-- arbitrary value for wheel mass -->
-  <xacro:property name="wheel_length" value="0.024" />
-  <xacro:property name="wheel_radius" value="0.018" />
-  <xacro:property name="profile_size" value="0.02" />
+    <!-- Constants for robot dimensions -->
+    <xacro:property name="PI" value="3.1415926535897931"/>
+    <xacro:property name="base_mass" value="1.0" /> <!-- arbitrary value for base mass -->
+    <xacro:property name="base_width" value="0.21" />
+    <xacro:property name="base_length" value="0.22" />
+    <xacro:property name="base_height" value="0.07" />
+    <xacro:property name="wheel_mass" value="0.02" /> <!-- arbitrary value for wheel mass -->
+    <xacro:property name="wheel_length" value="0.024" />
+    <xacro:property name="wheel_radius" value="0.0185" />
+    <xacro:property name="profile_size" value="0.02" />
 
-  <!-- Base Link -->
-  <link name="${prefix}base_link">
-    <collision>
-      <origin xyz="${base_width / 2} ${base_length / 2} ${wheel_radius + 0.04}" rpy="0 0 0"/>
-      <geometry>
-        <box size="0.25 0.25 0.06"/>
-      </geometry>
-    </collision>
+    <!-- Base Link -->
+    <link name="${prefix}base_link">
+      <collision>
+        <origin xyz="${base_length / 2} ${base_width / 2} ${wheel_radius + 0.009}" rpy="0 0 0"/>
+        <geometry>
+          <box size="${base_length} ${base_width} ${base_height}"/>
+        </geometry>
+      </collision>
 
-    <visual>
-      <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
-      <geometry>
-        <mesh filename="${mesh_dir}/visual/chassis.stl" scale="0.001 0.001 0.001"/>
-      </geometry>
-      <material name="grey"/>
-    </visual>
-
-    <inertial>
-      <origin xyz="${base_width / 2} ${base_length / 2} ${wheel_radius + base_height / 2}" rpy="0 0 0"/>
-      <mass value="${base_mass}"/>
-      <inertia
-        ixx="${base_mass / 12.0 * (base_length*base_length + base_height*base_height)}" ixy="0.0" ixz="0.0"
-        iyy="${base_mass / 12.0 * (base_height*base_height + base_width*base_width)}" iyz="0.0"
-        izz="${base_mass / 12.0 * (base_width*base_width + base_length*base_length)}"/>
-      </inertial>
+      <visual>
+        <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="${mesh_dir}/visual/xavbot_chassis_2.1.0.dae"/>
+        </geometry>
+      </visual>
     </link>
 
     <!-- front left wheel link -->
     <joint name="${prefix}front_left_wheel_joint" type="continuous">
       <parent link="${prefix}base_link"/>
       <child link="${prefix}front_left_wheel"/>
-      <origin xyz="0.219 0.250 ${wheel_radius}" rpy="0 0 ${PI/2}"/>
-      <axis xyz="1 0 0"/>
-      <dynamics damping="0.2"/>
+      <origin xyz="${base_length - 0.03} ${base_width} ${wheel_radius}" rpy="-${PI/2} ${PI} 0"/>
+      <axis xyz="0 0 1"/>
     </joint>
 
     <link name="${prefix}front_left_wheel">
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="${mesh_dir}/collision/dummy_wheel.stl" scale="0.001 0.001 0.001"/>
+          <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
         </geometry>
       </collision>
 
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="${mesh_dir}/visual/dummy_wheel.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="${mesh_dir}/visual/mecanum_simple.dae"/>
         </geometry>
-        <material name="green"/>
       </visual>
-
-      <inertial>
-        <origin xyz="0 0 0" rpy="${wheel_length / 2} 0 0"/>
-        <mass value="${wheel_mass}"/>
-        <inertia
-          ixx="${wheel_mass / 12.0 * (3*wheel_radius + wheel_length*wheel_length)}" ixy="0.0" ixz="0.0"
-          iyy="${wheel_mass / 12.0 * wheel_radius*wheel_radius}" iyz="0.0"
-          izz="${wheel_mass / 12.0 * wheel_radius*wheel_radius}"/>
-        </inertial>
-      </link>
+    </link>
 
     <!-- front right wheel link -->
     <joint name="${prefix}front_right_wheel_joint" type="continuous">
       <parent link="${prefix}base_link"/>
       <child link="${prefix}front_right_wheel"/>
-      <origin xyz="0.219 0 ${wheel_radius}" rpy="0 0 -${PI/2}"/>
-      <axis xyz="1 0 0"/>
-      <dynamics damping="0.2"/>
+      <origin xyz="${base_length - 0.03} 0 ${wheel_radius}" rpy="${PI/2} 0 0"/>
+      <axis xyz="0 0 -1"/>
     </joint>
 
     <link name="${prefix}front_right_wheel">
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="${mesh_dir}/collision/dummy_wheel.stl" scale="0.001 0.001 0.001"/>
+          <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
         </geometry>
       </collision>
 
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="${mesh_dir}/visual/dummy_wheel.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="${mesh_dir}/visual/mecanum_simple.dae"/>
         </geometry>
-        <material name="green"/>
+
       </visual>
+    </link>
 
-      <inertial>
-        <origin xyz="0 0 0" rpy="${wheel_length / 2} 0 0"/>
-        <mass value="${wheel_mass}"/>
-        <inertia
-          ixx="${wheel_mass / 12.0 * (3*wheel_radius + wheel_length*wheel_length)}" ixy="0.0" ixz="0.0"
-          iyy="${wheel_mass / 12.0 * wheel_radius*wheel_radius}" iyz="0.0"
-          izz="${wheel_mass / 12.0 * wheel_radius*wheel_radius}"/>
-        </inertial>
-      </link>
+    <!-- rear left wheel link -->
+    <joint name="${prefix}rear_left_wheel_joint" type="continuous">
+      <parent link="${prefix}base_link"/>
+      <child link="${prefix}rear_left_wheel"/>
+      <origin xyz="0.03 ${base_width} ${wheel_radius}" rpy="-${PI/2} ${PI} 0"/>
+      <axis xyz="0 0 1"/>
+    </joint>
 
-      <!-- rear left wheel link -->
-      <joint name="${prefix}rear_left_wheel_joint" type="continuous">
-        <parent link="${prefix}base_link"/>
-        <child link="${prefix}rear_left_wheel"/>
-        <origin xyz="0.031 0.250 ${wheel_radius}" rpy="0 0 ${PI/2}"/>
-        <axis xyz="1 0 0"/>
-        <dynamics damping="0.2"/>
-      </joint>
+    <link name="${prefix}rear_left_wheel">
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
+        </geometry>
+      </collision>
 
-      <link name="${prefix}rear_left_wheel">
-        <collision>
-          <origin xyz="0 0 0" rpy="0 0 0"/>
-          <geometry>
-            <mesh filename="${mesh_dir}/collision/dummy_wheel.stl" scale="0.001 0.001 0.001"/>
-          </geometry>
-        </collision>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="${mesh_dir}/visual/mecanum_simple.dae"/>
+        </geometry>
+      </visual>
+    </link>
 
-        <visual>
-          <origin xyz="0 0 0" rpy="0 0 0"/>
-          <geometry>
-            <mesh filename="${mesh_dir}/visual/dummy_wheel.stl" scale="0.001 0.001 0.001"/>
-          </geometry>
-          <material name="green"/>
-        </visual>
+    <!-- rear right wheel link -->
+    <joint name="${prefix}rear_right_wheel_joint" type="continuous">
+      <parent link="${prefix}base_link"/>
+      <child link="${prefix}rear_right_wheel"/>
+      <origin xyz="0.03 0 ${wheel_radius}" rpy="${PI/2} 0 0"/>
+      <axis xyz="0 0 -1"/>
+    </joint>
 
-        <inertial>
-          <origin xyz="0 0 0" rpy="${wheel_length / 2} 0 0"/>
-          <mass value="${wheel_mass}"/>
-          <inertia
-            ixx="${wheel_mass / 12.0 * (3*wheel_radius + wheel_length*wheel_length)}" ixy="0.0" ixz="0.0"
-            iyy="${wheel_mass / 12.0 * wheel_radius*wheel_radius}" iyz="0.0"
-            izz="${wheel_mass / 12.0 * wheel_radius*wheel_radius}"/>
-          </inertial>
-        </link>
+    <link name="${prefix}rear_right_wheel">
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
+        </geometry>
+      </collision>
 
-      <!-- rear right wheel link -->
-      <joint name="${prefix}rear_right_wheel_joint" type="continuous">
-        <parent link="${prefix}base_link"/>
-        <child link="${prefix}rear_right_wheel"/>
-        <origin xyz="0.031 0 ${wheel_radius}" rpy="0 0 -${PI/2}"/>
-        <axis xyz="1 0 0"/>
-        <dynamics damping="0.2"/>
-      </joint>
-
-      <link name="${prefix}rear_right_wheel">
-        <collision>
-          <origin xyz="0 0 0" rpy="0 0 0"/>
-          <geometry>
-            <mesh filename="${mesh_dir}/collision/dummy_wheel.stl" scale="0.001 0.001 0.001"/>
-          </geometry>
-        </collision>
-
-        <visual>
-          <origin xyz="0 0 0" rpy="0 0 0"/>
-          <geometry>
-            <mesh filename="${mesh_dir}/visual/dummy_wheel.stl" scale="0.001 0.001 0.001"/>
-          </geometry>
-          <material name="green"/>
-        </visual>
-
-        <inertial>
-          <origin xyz="0 0 0" rpy="${wheel_length / 2} 0 0"/>
-          <mass value="${wheel_mass}"/>
-          <inertia
-            ixx="${wheel_mass / 12.0 * (3*wheel_radius + wheel_length*wheel_length)}" ixy="0.0" ixz="0.0"
-            iyy="${wheel_mass / 12.0 * wheel_radius*wheel_radius}" iyz="0.0"
-            izz="${wheel_mass / 12.0 * wheel_radius*wheel_radius}"/>
-          </inertial>
-        </link>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="${mesh_dir}/visual/mecanum_simple.dae"/>
+        </geometry>
+      </visual>
+    </link>
 
   </xacro:macro>
 

@@ -24,35 +24,21 @@ def generate_launch_description():
     # Declare arguments
     declared_arguments = []
     declared_arguments.append(
-        DeclareLaunchArgument(
-            "description_package",
-            default_value="xavbot_description",
-            description="Description package with robot URDF/xacro files. Usually the argument \
-        is not set, it enables use of a custom description.",
+        DeclareLaunchArgument("prefix",
+                              default_value='""',
+                              description="Prefix of the joint names",
         )
     )
     declared_arguments.append(
-        DeclareLaunchArgument(
-            "description_file",
-            default_value="xavbot.urdf.xacro",
-            description="URDF/XACRO description file with the robot.",
+        DeclareLaunchArgument("arm",
+                              default_value='False',
+                              description="Toggle loading in the xavbot arm",
         )
     )
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "prefix",
-            default_value='""',
-            description="Prefix of the joint names, useful for \
-        multi-robot setup. If changed than also joint names in the controllers' configuration \
-        have to be updated.",
-        )
-    )
-    
 
-    # Initialize Arguments
-    description_package = LaunchConfiguration("description_package")
-    description_file = LaunchConfiguration("description_file")
-    prefix = LaunchConfiguration("prefix")
+    # Initialize Arguments   
+    prefix = LaunchConfiguration("prefix", default="")
+    arm = LaunchConfiguration("arm", default=False)
     use_gui = LaunchConfiguration('gui', default=True)
 
     # Get URDF via xacro
@@ -61,17 +47,16 @@ def generate_launch_description():
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
             PathJoinSubstitution(
-                [FindPackageShare(description_package), "urdf", description_file]
+                [FindPackageShare("xavbot_description"), "urdf", "xavbot.urdf.xacro"]
             ),
-            " ",
-            "prefix:=",
-            prefix,
+            " prefix:=", prefix,
+            " arm:=", arm
         ]
     )
     robot_description = {"robot_description": robot_description_content}
 
     rviz_config_file = PathJoinSubstitution(
-        [FindPackageShare(description_package), "rviz", "view_xavbot.rviz"]
+        [FindPackageShare("xavbot_description"), "rviz", "view_xavbot.rviz"]
     )
 
     joint_state_publisher_node = Node(

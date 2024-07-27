@@ -1,13 +1,9 @@
-import os
 from typing import List
 
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, RegisterEventHandler
-from launch.conditions import IfCondition
+from launch.actions import RegisterEventHandler
 from launch.event_handlers import OnProcessExit
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import (Command, FindExecutable, LaunchConfiguration,
-                                  PathJoinSubstitution)
+from launch.substitutions import Command, FindExecutable, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from moveit_configs_utils import MoveItConfigsBuilder
@@ -29,7 +25,7 @@ def generate_launch_description():
         ' ',
         PathJoinSubstitution(
             [FindPackageShare('xavbot_description'), 'urdf', 'xavbot.urdf.xacro']),
-            ' arm:=True'
+            ' arm:=False'
         ]
     )
 
@@ -60,8 +56,8 @@ def generate_launch_description():
 
     xavbot_controllers = [
         'xavbot_platform_controller',
-        'xavbot_arm_controller',
-        'xavbot_gripper_controller'
+        # 'xavbot_arm_controller',
+        # 'xavbot_gripper_controller'
     ]
 
     # Delay start of xavbot controllers after `joint_state_broadcaster`
@@ -72,15 +68,15 @@ def generate_launch_description():
         )
     )
 
-    moveit_config = MoveItConfigsBuilder('xavbot', package_name='xavbot_moveit_config').to_moveit_configs()
-    move_group = generate_move_group_launch(moveit_config)
+    # moveit_config = MoveItConfigsBuilder('xavbot', package_name='xavbot_moveit_config').to_moveit_configs()
+    # move_group = generate_move_group_launch(moveit_config)
 
     nodes = [
         control_node,
         robot_state_pub_node,
         joint_state_broadcaster_spawner,
         xavbot_controllers_spawner,
-        move_group,
+        # move_group,
     ]
 
     return LaunchDescription(nodes)

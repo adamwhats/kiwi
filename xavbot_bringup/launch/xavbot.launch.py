@@ -69,7 +69,7 @@ def generate_launch_description():
         vio_launch,
         dummy_odom_tf,
         # nav2_bringup,
-        perception_launch,
+        # perception_launch,
     ]
 
     return LaunchDescription(actions)
