@@ -21,8 +21,9 @@ xavbot_platform_controller:
     rl_name: "rear_left_wheel_joint"
     rr_name: "rear_right_wheel_joint"
     wheel_radius: 0.0175
-    wheelbase_width: 0.274
-    wheelbase_length: 0.188
+    wheelbase_width: 0.246
+    wheelbase_length: 0.150
+    max_wheel_rps: 2.0
 
 xavbot_arm_controller:
   ros__parameters:

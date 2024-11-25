@@ -14,8 +14,8 @@
         <param name="fr_port">2</param>
         <param name="rl_port">0</param>
         <param name="rr_port">3</param>
-        <param name="fl_direction">-1</param>
-        <param name="fr_direction">1</param>
+        <param name="fl_direction">1</param>
+        <param name="fr_direction">-1</param>
         <param name="rl_direction">-1</param>
         <param name="rr_direction">1</param>
         <param name="device">/dev/ttyACM0</param>
