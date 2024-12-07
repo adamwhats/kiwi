@@ -17,5 +17,6 @@ services:
       - REBUILD=false
     entrypoint: src/xavbot/xavbot_dockerfiles/scripts/pi_entrypoint.sh
     command: ros2 launch xavbot_bringup pi.launch.py
+    restart: unless-stopped
     stdin_open: true
     tty: true
