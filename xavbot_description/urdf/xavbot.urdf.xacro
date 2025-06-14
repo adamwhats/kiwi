@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="xavbot">
   <xacro:arg name="prefix" default="" />
-  <xacro:arg name="arm" default="true" />
+  <xacro:arg name="arm" default="false" />
 
   <!-- Import Geometry -->
   <xacro:include filename="$(find xavbot_description)/urdf/xavbot.platform.xacro" />
   <xacro:xavbot_platform prefix="$(arg prefix)" mesh_dir="package://xavbot_description/meshes" />
   <xacro:include filename="$(find realsense2_description)/urdf/_d435i.urdf.xacro"/>
   <xacro:sensor_d435i parent="base_link" name="VIO_camera" use_nominal_extrinsics="false">
-    <origin xyz="0.22425 0.14 0.09" rpy="0 0 0"/>
+    <origin xyz="0.129 0.08 0.0985" rpy="0 0 0"/>
   </xacro:sensor_d435i>
 
   <!-- Import xavbot ros2_control description -->
@@ -21,9 +21,6 @@
     <!-- Import Geometry -->
     <xacro:include filename="$(find xavbot_description)/urdf/xavbot.arm.xacro" />
     <xacro:xavbot_arm prefix="$(arg prefix)" mesh_dir="package://xavbot_description/meshes" standalone="false" />
-    <xacro:sensor_d435i parent="base_link" name="arm_camera" use_nominal_extrinsics="false">
-      <origin xyz="0.173 0.13 0.163" rpy="0 0.6981 0"/>
-    </xacro:sensor_d435i>
 
     <!-- Import xavbot ros2_control description -->
     <xacro:include filename="$(find xavbot_description)/urdf/xavbot.arm.ros2_control.xacro" />
