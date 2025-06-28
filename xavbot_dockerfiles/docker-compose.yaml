@@ -20,3 +20,4 @@ services:
     command: ros2 launch xavbot_bringup pi.launch.py
     stdin_open: true
     tty: true
+    restart: unless-stopped

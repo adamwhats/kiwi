@@ -26,3 +26,9 @@ This codebase is designed to work in the [NVIDIA Isaac ROS Docker Development En
   - `src/isaac_ros_common/docker/scripts/workspace-entrypoint.sh`
   
   need to be replaced with their counterparts from inside the `/home/dev/workspaces/isaac_ros-dev/src/xavbot/xavbot_dockerfiles/isaac_ros` directory
+
+## Bringup
+You can then bring up the system with:
+"""
+./src/isaac_ros_common/scripts/run_dev.sh 
+"""

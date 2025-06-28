@@ -142,6 +142,16 @@
       </visual>
     </link>
 
+    <!-- lidar -->
+    <joint name="${prefix}lidar_joint" type="continuous">
+     <parent link="${prefix}base_link"/>
+      <child link="${prefix}lidar"/>
+      <origin xyz="0.08 0.08 0.135" rpy="0 0 ${PI}"/>
+      <axis xyz="0 0 -1"/>
+    </joint>
+
+    <link name="${prefix}lidar"/>
+
   </xacro:macro>
 
 </robot>

@@ -29,7 +29,7 @@
                     </locator>
                     <locator>
                         <udpv4>
-                            <address>10.42.0.54</address>
+                            <address>10.42.0.176</address>
                         </udpv4>
                     </locator>
                 </initialPeersList>

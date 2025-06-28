@@ -128,7 +128,7 @@ def generate_launch_description():
         composable_node_descriptions=[
             realsense_camera_node,
             # vio_camera_encoder_node,
-            visual_slam_node
+            # visual_slam_node
         ],
         output='screen'
     )
@@ -143,5 +143,5 @@ def generate_launch_description():
     return launch.LaunchDescription([
         visual_slam_launch_container,
         # realsense_camera_node,
-        dummy_tf
+        # dummy_tf
     ])
