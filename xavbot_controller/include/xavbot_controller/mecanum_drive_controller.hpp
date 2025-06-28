@@ -65,6 +65,9 @@ namespace mecanum_drive_controller
       double wheel_radius_;
       double wheelbase_width_;
       double wheelbase_length_;
+      double max_wheel_rps_;
+      double max_linear_vel_;
+      double max_angular_vel_;
 
       Eigen::Matrix<double, 4, 3> T_inv_;
       Eigen::Matrix<double, 3, 4> T_fw_;
