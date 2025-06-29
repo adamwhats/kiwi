@@ -20,13 +20,8 @@ XavBot is a small holonomic robot based around the NVIDIA Jetson Xavier NX with 
  TODO - Implement method of automatically applying the rules at /etc/iptables/rules.v4 on the jetson
 
 ### Isaac ROS Dev Environment
-This codebase is designed to work in the [NVIDIA Isaac ROS Docker Development Environment](https://nvidia-isaac-ros.github.io/repositories_and_packages/isaac_ros_common/index.html). To set this up, the original files found at:
-  - `src/isaac_ros_common/scripts/.isaac_ros_common-config`
-  - `src/isaac_ros_common/scripts/.isaac_ros_dev-dockerargs`
-  - `src/isaac_ros_common/docker/scripts/workspace-entrypoint.sh`
+This codebase is designed to work in the [NVIDIA Isaac ROS Docker Development Environment](https://nvidia-isaac-ros.github.io/repositories_and_packages/isaac_ros_common/index.html). To set this, run the [`setup_isaac_ros.bash`](/xavbot_dockerfiles/isaac_ros/setup_isaac_ros.bash) script.
   
-  need to be replaced with their counterparts from inside the `/home/dev/workspaces/isaac_ros-dev/src/xavbot/xavbot_dockerfiles/isaac_ros` directory
-
 ## Bringup
 You can then bring up the system with:
 """
