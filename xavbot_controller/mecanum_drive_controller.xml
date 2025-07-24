@@ -1,9 +1,0 @@
-<library path="xavbot_controller">
-  <class name="mecanum_drive_controller/MecanumDriveController"
-         type="mecanum_drive_controller::MecanumDriveController"
-         base_class_type="controller_interface::ControllerInterface">
-    <description>
-      Controller interface for a velocity controlled mecaunum drive robot
-    </description>
-  </class>
-</library>

@@ -14,4 +14,7 @@ if [ "$REBUILD" = true ]; then
   source "./install/setup.bash"
 fi
 
+# Add teleop alias
+echo "alias teleop='ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/xavbot_platform_controller/reference -p stamped:=True -p frame_id:=base_link'" >> ~/.bash_aliases
+
 exec "$@"

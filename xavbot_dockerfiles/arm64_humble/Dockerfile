@@ -24,3 +24,5 @@ ENV DEBIAN_FRONTEND=dialog
 RUN apt-get update \
    && apt-get -y install --no-install-recommends python3-pip \
    && pip install setuptools==58.2.0
+
+RUN echo "if [ -f ./install/setup.bash ]; then source ./install/setup.bash; fi" >> ~/.bashrc
