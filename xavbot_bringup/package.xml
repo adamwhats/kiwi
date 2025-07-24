@@ -12,9 +12,7 @@
 
   <depend>rclpy</depend>
   <depend>xavbot_behavior</depend>
-  <depend>xavbot_controller</depend>
   <depend>xavbot_description</depend>
-  <depend>xavbot_hardware</depend>
   <depend>xavbot_interfaces</depend>
   <depend>xavbot_moveit_config</depend>
   <depend>xavbot_perception</depend>
