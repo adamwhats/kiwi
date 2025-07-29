@@ -1,19 +1,14 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="xavbot">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="xavbot_arm">
   <xacro:arg name="prefix" default="" />
-  <xacro:arg name="standalone" default="true" />
 
   <!-- Import Geometry -->
   <xacro:include filename="$(find xavbot_description)/urdf/xavbot.arm.xacro" />
-  <xacro:xavbot_arm prefix="$(arg prefix)" mesh_dir="package://xavbot_description/meshes" standalone="$(arg standalone)" />
+  <xacro:xavbot_arm prefix="$(arg prefix)" mesh_dir="package://xavbot_description/meshes" standalone="true" />
 
   <!-- Import xavbot ros2_control description -->
   <xacro:include filename="$(find xavbot_description)/urdf/xavbot.arm.ros2_control.xacro" />
-  <xacro:xavbot_arm_control name="xavbot" prefix="$(arg prefix)" />
-  
-  <!-- Import Rviz colors -->
-  <xacro:if value="$(arg standalone)">
-    <xacro:include filename="$(find xavbot_description)/urdf/xavbot.materials.xacro" />
-  </xacro:if>
+  <xacro:xavbot_arm_control name="xavbot_arm" prefix="$(arg prefix)" />
+
 
 </robot>

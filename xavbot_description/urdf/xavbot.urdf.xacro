@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="xavbot">
   <xacro:arg name="prefix" default="" />
-  <xacro:arg name="arm" default="false" />
+  <xacro:arg name="arm" default="true" />
 
   <!-- Import Geometry -->
   <xacro:include filename="$(find xavbot_description)/urdf/xavbot.platform.xacro" />

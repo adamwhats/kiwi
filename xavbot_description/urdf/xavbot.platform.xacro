@@ -39,7 +39,7 @@
       <visual>
         <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="${mesh_dir}/visual/xavbot_chassis_2.1.0.dae"/>
+          <mesh filename="${mesh_dir}/xavbot_chassis_2.1.0.dae"/>
         </geometry>
       </visual>
     </link>
@@ -63,7 +63,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="${mesh_dir}/visual/mecanum_simple.dae"/>
+          <mesh filename="${mesh_dir}/mecanum_simple.dae"/>
         </geometry>
       </visual>
     </link>
@@ -87,7 +87,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="${mesh_dir}/visual/mecanum_simple.dae"/>
+          <mesh filename="${mesh_dir}/mecanum_simple.dae"/>
         </geometry>
 
       </visual>
@@ -112,7 +112,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="${mesh_dir}/visual/mecanum_simple.dae"/>
+          <mesh filename="${mesh_dir}/mecanum_simple.dae"/>
         </geometry>
       </visual>
     </link>
@@ -136,7 +136,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="${mesh_dir}/visual/mecanum_simple.dae"/>
+          <mesh filename="${mesh_dir}/mecanum_simple.dae"/>
         </geometry>
       </visual>
     </link>
