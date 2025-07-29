@@ -10,6 +10,7 @@
             </hardware>
             <joint name="link1_joint">
                 <command_interface name="position"/>
+                <command_interface name="velocity"/>
                 <state_interface name="position">
                   <param name="initial_value">${initial_positions['link1_joint']}</param>
                 </state_interface>
@@ -17,6 +18,7 @@
             </joint>
             <joint name="link2_joint">
                 <command_interface name="position"/>
+                <command_interface name="velocity"/>
                 <state_interface name="position">
                   <param name="initial_value">${initial_positions['link2_joint']}</param>
                 </state_interface>
@@ -24,22 +26,25 @@
             </joint>
             <joint name="link3_joint">
                 <command_interface name="position"/>
+                <command_interface name="velocity"/>
                 <state_interface name="position">
                   <param name="initial_value">${initial_positions['link3_joint']}</param>
                 </state_interface>
                 <state_interface name="velocity"/>
             </joint>
-            <joint name="link4_joint">
+            <joint name="gripper_virtual_joint">
                 <command_interface name="position"/>
+                <command_interface name="velocity"/>
                 <state_interface name="position">
-                  <param name="initial_value">${initial_positions['link4_joint']}</param>
+                  <param name="initial_value">${initial_positions['gripper_virtual_joint']}</param>
                 </state_interface>
                 <state_interface name="velocity"/>
             </joint>
-            <joint name="gripper_joint">
+            <joint name="virtual_joint">
                 <command_interface name="position"/>
+                <command_interface name="velocity"/>
                 <state_interface name="position">
-                  <param name="initial_value">${initial_positions['gripper_joint']}</param>
+                  <param name="initial_value">${initial_positions['virtual_joint']}</param>
                 </state_interface>
                 <state_interface name="velocity"/>
             </joint>

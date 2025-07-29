@@ -1,8 +1,8 @@
 # Default initial positions for xavbot's ros2_control fake system
 
 initial_positions:
-  gripper_joint: 0
+  gripper_virtual_joint: 0
   link1_joint: 0
   link2_joint: 0
   link3_joint: 0
-  link4_joint: 0
+  virtual_joint: 0

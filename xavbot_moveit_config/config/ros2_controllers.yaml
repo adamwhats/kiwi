@@ -3,29 +3,43 @@ controller_manager:
   ros__parameters:
     update_rate: 100  # Hz
 
-    xavbot_arm_controller:
+    gripper_controller:
+      type: position_controllers/GripperActionController
+
+
+    base_controller:
       type: joint_trajectory_controller/JointTrajectoryController
 
 
-    xavbot_gripper_controller:
-      type: position_controllers/GripperActionController
+    arm_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
 
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
 
-xavbot_arm_controller:
+gripper_controller:
+  ros__parameters:
+    joint: gripper_virtual_joint
+base_controller:
+  ros__parameters:
+    joints:
+      - virtual_joint
+    command_interfaces:
+      - position
+      - velocity
+    state_interfaces:
+      - position
+      - velocity
+arm_controller:
   ros__parameters:
     joints:
       - link1_joint
       - link2_joint
       - link3_joint
-      - link4_joint
     command_interfaces:
       - position
+      - velocity
     state_interfaces:
       - position
       - velocity
-xavbot_gripper_controller:
-  ros__parameters:
-    joint: gripper_joint

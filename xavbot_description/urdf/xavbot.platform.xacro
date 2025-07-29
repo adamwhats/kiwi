@@ -37,9 +37,9 @@
       </collision>
 
       <visual>
-        <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
+        <origin xyz="0 0 ${wheel_radius + 0.00495} " rpy="0 0 0"/>
         <geometry>
-          <mesh filename="${mesh_dir}/xavbot_chassis_2.1.0.dae"/>
+          <mesh filename="${mesh_dir}/base.dae"/>
         </geometry>
       </visual>
     </link>

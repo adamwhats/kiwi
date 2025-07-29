@@ -20,7 +20,7 @@
         <joint name="${prefix}link0_joint" type="fixed">
           <parent link="${prefix}base_link"/>
           <child link="${prefix}link0"/>
-          <origin xyz="0.18 0.180 0.073" rpy="0 0 0"/>
+          <origin xyz="0.17925 0.186 0.05195" rpy="0 0 0"/>
         </joint>
       </xacro:unless>
 
@@ -156,7 +156,7 @@
         <axis xyz="1 0 0"/>
         <limit 
           lower="0.0" 
-          upper="0.0536"
+          upper="0.055"
           effort="4.0"
           velocity="0.1"/>
       </joint>
@@ -175,7 +175,12 @@
         <child link="${prefix}rightfinger"/>
         <mimic joint="${prefix}gripper_virtual_joint" multiplier="0.5"/>
         <origin xyz="0 0.059 0.00375" rpy="${-PI/2} ${-PI/2} 0"/>
-        <axis xyz="0 0 1 "/>
+        <axis xyz="1 0 0 "/>
+        <limit 
+          lower="0.0" 
+          upper="0.0275"
+          velocity="0.05"
+          effort="2.0"/>
       </joint>
 
       <link name="${prefix}rightfinger">
@@ -200,7 +205,12 @@
         <child link="${prefix}leftfinger"/>
         <mimic joint="${prefix}gripper_virtual_joint" multiplier="0.5"/>
         <origin xyz="0 0.059 -0.01875" rpy="${-PI/2} ${PI/2} 0"/>
-        <axis xyz="0 0 1 "/>
+        <axis xyz="1 0 0 "/>
+        <limit 
+          lower="0.0" 
+          upper="0.0275"
+          velocity="0.05"
+          effort="2.0"/>
       </joint>
 
       <link name="${prefix}leftfinger">
