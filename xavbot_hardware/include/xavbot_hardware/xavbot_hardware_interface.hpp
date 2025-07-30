@@ -84,6 +84,9 @@ private:
   // Create the config and wheelstate structs
   Config cfg_;
   WheelStates wheels_;
+
+  // Helper for direction correction
+  std::array<double, 4> apply_direction_correction(const std::array<double, 4>& values) const;  
 };
 
 }  // xavbot_hardware_interface

@@ -35,7 +35,7 @@ CallbackReturn XavbotHardware::on_init(const hardware_interface::HardwareInfo & 
     if (joint.command_interfaces.size() != 1)
     {
       RCLCPP_FATAL(
-        rclcpp::get_logger("XavBotHardware"),
+        rclcpp::get_logger("XavbotHardware"),
         "Joint '%s' has %zu command interfaces found. 1 expected.", joint.name.c_str(),
         joint.command_interfaces.size());
       return CallbackReturn::ERROR;
@@ -44,7 +44,7 @@ CallbackReturn XavbotHardware::on_init(const hardware_interface::HardwareInfo & 
     if (joint.command_interfaces[0].name != hardware_interface::HW_IF_VELOCITY)
     {
       RCLCPP_FATAL(
-        rclcpp::get_logger("XavBotHardware"),
+        rclcpp::get_logger("XavbotHardware"),
         "Joint '%s' have %s command interfaces found. '%s' expected.", joint.name.c_str(),
         joint.command_interfaces[0].name.c_str(), hardware_interface::HW_IF_VELOCITY);
       return CallbackReturn::ERROR;
@@ -53,7 +53,7 @@ CallbackReturn XavbotHardware::on_init(const hardware_interface::HardwareInfo & 
     if (joint.state_interfaces.size() != 2)
     {
       RCLCPP_FATAL(
-        rclcpp::get_logger("XavBotHardware"),
+        rclcpp::get_logger("XavbotHardware"),
         "Joint '%s' has %zu state interface. 2 expected.", joint.name.c_str(),
         joint.state_interfaces.size());
       return CallbackReturn::ERROR;
@@ -62,7 +62,7 @@ CallbackReturn XavbotHardware::on_init(const hardware_interface::HardwareInfo & 
     if (joint.state_interfaces[0].name != hardware_interface::HW_IF_POSITION)
     {
       RCLCPP_FATAL(
-        rclcpp::get_logger("XavBotHardware"),
+        rclcpp::get_logger("XavbotHardware"),
         "Joint '%s' have '%s' as first state interface. '%s' expected.", joint.name.c_str(),
         joint.state_interfaces[0].name.c_str(), hardware_interface::HW_IF_POSITION);
       return CallbackReturn::ERROR;
@@ -71,7 +71,7 @@ CallbackReturn XavbotHardware::on_init(const hardware_interface::HardwareInfo & 
     if (joint.state_interfaces[1].name != hardware_interface::HW_IF_VELOCITY)
     {
       RCLCPP_FATAL(
-        rclcpp::get_logger("XavBotHardware"),
+        rclcpp::get_logger("XavbotHardware"),
         "Joint '%s' have '%s' as second state interface. '%s' expected.", joint.name.c_str(),
         joint.state_interfaces[1].name.c_str(), hardware_interface::HW_IF_VELOCITY);
       return CallbackReturn::ERROR;
@@ -116,31 +116,42 @@ CallbackReturn XavbotHardware::on_activate(const rclcpp_lifecycle::State & /* pr
 
 CallbackReturn XavbotHardware::on_deactivate(const rclcpp_lifecycle::State & /* previous_state */)
 {
-  RCLCPP_INFO(rclcpp::get_logger("XavBotHardware"), "Deactivating...");
+  RCLCPP_INFO(rclcpp::get_logger("XavbotHardware"), "Deactivating...");
   motor_controller_.disconnect();
-  RCLCPP_INFO(rclcpp::get_logger("XavBotHardware"), "Deactivated!");
+  RCLCPP_INFO(rclcpp::get_logger("XavbotHardware"), "Deactivated!");
   return CallbackReturn::SUCCESS;
 }
 
 return_type XavbotHardware::read(const rclcpp::Time & /* time */, const rclcpp::Duration & /* period */)
 {
-  wheels_.positions = motor_controller_.get_positions();
-  wheels_.velocities = motor_controller_.get_velocities();
+  // Get raw values from motor controller
+  const auto raw_positions = motor_controller_.get_positions();
+  const auto raw_velocities = motor_controller_.get_velocities();
+  
+  // Apply direction correction and store in wheels_ structure
+  const auto corrected_positions = apply_direction_correction(raw_positions);
+  const auto corrected_velocities = apply_direction_correction(raw_velocities);
+  std::copy(corrected_positions.begin(), corrected_positions.end(), wheels_.positions.begin());
+  std::copy(corrected_velocities.begin(), corrected_velocities.end(), wheels_.velocities.begin());
+
   return hardware_interface::return_type::OK;
 }
 
 return_type XavbotHardware::write(const rclcpp::Time & /* time */, const rclcpp::Duration & /* period */)
 {
-
-  // Flip velocities to compensate for motor mounting direction
-  std::array<double, 4> direction_corrected_vels;
-  for (auto i = 0u; i < 4; i++)
-  {
-    direction_corrected_vels[i] = wheels_.cmd[i] * *cfg_.wheel_directions[*cfg_.wheel_ports[i]];
-  }
-  
+  const auto direction_corrected_vels = apply_direction_correction(wheels_.cmd);
   motor_controller_.set_velocities(direction_corrected_vels);
   return hardware_interface::return_type::OK;
+}
+
+std::array<double, 4> XavbotHardware::apply_direction_correction(const std::array<double, 4>& values) const
+{
+  std::array<double, 4> corrected_values;
+  for (size_t i = 0; i < 4; ++i)
+  {
+    corrected_values[i] = values[i] * *cfg_.wheel_directions[*cfg_.wheel_ports[i]];
+  }
+  return corrected_values;
 }
 
 }  // namespace xavbot_hardware_interface
