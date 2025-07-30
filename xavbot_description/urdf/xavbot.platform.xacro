@@ -142,7 +142,7 @@
     </link>
 
     <!-- lidar -->
-    <joint name="${prefix}lidar_joint" type="continuous">
+    <joint name="${prefix}lidar_joint" type="fixed">
      <parent link="${prefix}base_link"/>
       <child link="${prefix}lidar"/>
       <origin xyz="0.08 0.08 0.135" rpy="0 0 ${PI}"/>
