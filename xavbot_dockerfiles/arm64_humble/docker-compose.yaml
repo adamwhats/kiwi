@@ -7,7 +7,6 @@ services:
       - SYS_NICE
       - IPC_LOCK
       - SYS_RESOURCE  
-      
     volumes:
       - ~/xavbot_ws:/xavbot_ws
     devices:
@@ -18,7 +17,7 @@ services:
     environment:
       - DISPLAY=$DISPLAY
       - REBUILD=true
-    entrypoint: src/xavbot/xavbot_dockerfiles/scripts/pi_entrypoint.sh
+    entrypoint: src/xavbot/xavbot_dockerfiles/arm64_humble/pi_entrypoint.sh
     command: ros2 launch xavbot_bringup pi.launch.py
     restart: unless-stopped
     stdin_open: true
