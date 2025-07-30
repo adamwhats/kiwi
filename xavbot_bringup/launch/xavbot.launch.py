@@ -11,18 +11,17 @@ from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 def generate_launch_description():
 
     # Visual-inertial odometry
-    use_vio = LaunchConfiguration('odom', default=True)
+    use_vio = LaunchConfiguration('odom', default=False)
     vio_bringup = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             launch_file_path=PathJoinSubstitution([FindPackageShare('xavbot_bringup'), 'launch', 'vio.launch.py'])
         ),
         condition=IfCondition(use_vio)
     )
-    dummy_odom_tf = Node(package='tf2_ros',
-                        executable='static_transform_publisher',
-                        arguments=['0', '0', '0', '0', '0', '0', 'map', 'base_link'],
-                        condition=UnlessCondition(use_vio))
-    
+    # dummy_odom_tf = Node(package='tf2_ros',
+    #                     executable='static_transform_publisher',
+    #                     arguments=['0', '0', '0', '0', '0', '0', 'map', 'base_link'],
+    #                     condition=UnlessCondition(use_vio))
 
     # Lidar
     lidar_bringup = IncludeLaunchDescription(
@@ -31,6 +30,17 @@ def generate_launch_description():
         launch_arguments={
             'serial_port': '/dev/ttyUSB0',
             'frame_id': 'lidar'
+        }.items(),
+    )
+    lidar_odom_bringup = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            launch_file_path=PathJoinSubstitution([FindPackageShare('rf2o_laser_odometry'), 'launch', 'rf2o_laser_odometry.launch.py'])),
+        launch_arguments={
+            'odom_topic' : '/rf2o_odom',
+            'publish_tf' : 'True',  # Let robot_localization handle the main odom->base_link transform
+            'odom_frame_id' : '/rf2o_odom',
+            'freq' : '5.0',
+            'log_level': 'ERROR'
         }.items(),
     )
     
@@ -51,8 +61,8 @@ def generate_launch_description():
         # xavbot_pi_remote_launch,
         # remote_launch_terminator,
         vio_bringup,
-        dummy_odom_tf,
         lidar_bringup,
+        lidar_odom_bringup,
         nav2_bringup,
     ]
 
