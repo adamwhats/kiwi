@@ -17,3 +17,5 @@ RUN pip install \
 RUN apt-get update && apt-get install -y \
     x11-apps
 
+RUN echo "if [ -f ./install/setup.bash ]; then source ./install/setup.bash; fi" >> ~/.bashrc
+

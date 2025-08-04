@@ -1,5 +1,5 @@
 services:
-  xavbot-pi:
+  xavbot-jetson:
     build:
       context: ~/workspaces/isaac_ros-dev
       dockerfile: src/xavbot/xavbot_dockerfiles/jetson_humble/Dockerfile
@@ -8,13 +8,14 @@ services:
     devices:
      - "/dev/ttyUSB0:/dev/ttyUSB0"
     network_mode: host
+    shm_size: 512mb
     working_dir: /xavbot_ws
     environment:
       - DISPLAY=$DISPLAY
+      - ROS_WORKSPACE=/xavbot_ws
       - REBUILD=true
-    # entrypoint: src/xavbot/xavbot_dockerfiles/jetson_humble/pi_entrypoint.sh
-    # command: ros2 launch xavbot_bringup pi.launch.
-    command: /bin/bash
+    entrypoint: src/xavbot/xavbot_dockerfiles/jetson_humble/jetson_entrypoint.sh
+    command: ros2 launch xavbot_bringup xavbot.launch.py
     restart: unless-stopped
     stdin_open: true
     tty: true

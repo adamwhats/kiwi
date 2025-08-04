@@ -1,3 +1,4 @@
+import os
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
@@ -32,17 +33,32 @@ def generate_launch_description():
             'frame_id': 'lidar'
         }.items(),
     )
-    lidar_odom_bringup = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            launch_file_path=PathJoinSubstitution([FindPackageShare('rf2o_laser_odometry'), 'launch', 'rf2o_laser_odometry.launch.py'])),
-        launch_arguments={
-            'odom_topic' : '/rf2o_odom',
-            'publish_tf' : 'True',  # Let robot_localization handle the main odom->base_link transform
-            'odom_frame_id' : '/rf2o_odom',
-            'freq' : '5.0',
-            'log_level': 'ERROR'
-        }.items(),
+    lidar_odom = Node(
+        package='rf2o_laser_odometry',
+        executable='rf2o_laser_odometry_node',
+        name='rf2o_laser_odometry',
+        output='screen',
+        parameters=[{
+            'laser_scan_topic': '/scan',
+            'odom_topic': '/rf2o_odom',
+            'publish_tf': False,
+            'base_frame_id' : 'base_link',
+            'init_pose_from_topic' : '',
+            'freq' : 8.0
+        }],
+        arguments=['--ros-args', '--log-level', 'error']
     )
+
+    # EKF
+    ekf = Node(
+        package='robot_localization',
+        executable='ekf_node',
+        name='ekf_filter_node',
+        output='screen',
+        parameters=[PathJoinSubstitution([FindPackageShare('xavbot_bringup'), 'config', 'ekf.yaml'])],
+    )
+
+
     
     # Navigation
     use_nav2 = LaunchConfiguration('navigation', default=True)
@@ -59,11 +75,12 @@ def generate_launch_description():
 
     actions = [
         # xavbot_pi_remote_launch,
-        # remote_launch_terminator,
+        # remote_launch_terminator,'
         vio_bringup,
         lidar_bringup,
-        lidar_odom_bringup,
-        nav2_bringup,
+        lidar_odom,
+        ekf,
+        # nav2_bringup,
     ]
 
     return LaunchDescription(actions)
