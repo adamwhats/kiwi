@@ -10,7 +10,11 @@ fi
 
 # Optionally rebuild workspace
 if [ "$REBUILD" = true ]; then
-  colcon build --symlink-install --packages-ignore xavbot_behaviour xavbot_perception xavbot_teleop
+  colcon build \
+  --symlink-install \
+  --packages-up-to xavbot_bringup realsense2_description \
+  --packages-ignore xavbot_behaviour xavbot_perception xavbot_teleop
+  source "./install/setup.bash"
 fi
 
 # Add teleop alias
