@@ -13,10 +13,13 @@
     <xacro:property name="wheel_length" value="0.024" />
     <xacro:property name="wheel_radius" value="0.0185" />
 
+    <xacro:property name="half_width" value="${base_width / 2}" />
+    <xacro:property name="half_length" value="${base_length / 2}" />
+
     <!-- Base Link -->
     <link name="${prefix}base_link">
       <collision>
-        <origin xyz="${base_length / 2} ${base_width / 2} ${wheel_radius + 0.005}" rpy="0 0 0"/>
+        <origin xyz="0 0 ${wheel_radius + 0.00495}" rpy="0 0 0"/>
         <geometry>
           <box size="${base_length} ${base_width} ${2 * wheel_radius + 0.01}"/>
         </geometry>
@@ -37,7 +40,7 @@
       </collision>
 
       <visual>
-        <origin xyz="0 0 ${wheel_radius + 0.00495} " rpy="0 0 0"/>
+        <origin xyz="${-half_length} ${-half_width} ${wheel_radius + 0.00495} " rpy="0 0 0"/>
         <geometry>
           <mesh filename="${mesh_dir}/base.dae"/>
         </geometry>
@@ -48,7 +51,7 @@
     <joint name="${prefix}front_left_wheel_joint" type="continuous">
       <parent link="${prefix}base_link"/>
       <child link="${prefix}front_left_wheel"/>
-      <origin xyz="${base_length - 0.03} ${base_width} ${wheel_radius}" rpy="-${PI/2} ${PI} 0"/>
+      <origin xyz="${half_length - 0.03} ${half_width} ${wheel_radius}" rpy="-${PI/2} ${PI} 0"/>
       <axis xyz="0 0 1"/>
     </joint>
 
@@ -72,7 +75,7 @@
     <joint name="${prefix}front_right_wheel_joint" type="continuous">
       <parent link="${prefix}base_link"/>
       <child link="${prefix}front_right_wheel"/>
-      <origin xyz="${base_length - 0.03} 0 ${wheel_radius}" rpy="${PI/2} 0 0"/>
+      <origin xyz="${half_length - 0.03} ${-half_width} ${wheel_radius}" rpy="${PI/2} 0 0"/>
       <axis xyz="0 0 -1"/>
     </joint>
 
@@ -97,7 +100,7 @@
     <joint name="${prefix}rear_left_wheel_joint" type="continuous">
       <parent link="${prefix}base_link"/>
       <child link="${prefix}rear_left_wheel"/>
-      <origin xyz="0.03 ${base_width} ${wheel_radius}" rpy="-${PI/2} ${PI} 0"/>
+      <origin xyz="${-half_length + 0.03} ${half_width} ${wheel_radius}" rpy="-${PI/2} ${PI} 0"/>
       <axis xyz="0 0 1"/>
     </joint>
 
@@ -121,7 +124,7 @@
     <joint name="${prefix}rear_right_wheel_joint" type="continuous">
       <parent link="${prefix}base_link"/>
       <child link="${prefix}rear_right_wheel"/>
-      <origin xyz="0.03 0 ${wheel_radius}" rpy="${PI/2} 0 0"/>
+      <origin xyz="${-half_length + 0.03} ${-half_width} ${wheel_radius}" rpy="${PI/2} 0 0"/>
       <axis xyz="0 0 -1"/>
     </joint>
 

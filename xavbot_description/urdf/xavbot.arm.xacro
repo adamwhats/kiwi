@@ -20,7 +20,7 @@
         <joint name="${prefix}link0_joint" type="fixed">
           <parent link="${prefix}base_link"/>
           <child link="${prefix}link0"/>
-          <origin xyz="0.17925 0.186 0.05195" rpy="0 0 0"/>
+          <origin xyz="0.07425 0.076 0.05195" rpy="0 0 0"/>
         </joint>
       </xacro:unless>
 

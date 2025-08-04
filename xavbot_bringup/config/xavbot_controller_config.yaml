@@ -26,7 +26,7 @@ xavbot_platform_controller:
     kinematics:
       base_frame_offset: { x: 0.0, y: 0.0, theta: 0.0 }
       wheels_radius: 0.0175
-      sum_of_robot_center_projection_on_X_Y_axis: 0.198
+      sum_of_robot_center_projection_on_X_Y_axis: 0.227
 
     base_frame_id: "base_link"
     odom_frame_id: "odom"
