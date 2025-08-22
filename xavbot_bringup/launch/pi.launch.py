@@ -25,7 +25,7 @@ def generate_launch_description():
         ' ',
         PathJoinSubstitution(
             [FindPackageShare('xavbot_description'), 'urdf', 'xavbot.urdf.xacro']),
-            ' arm:=False'
+            ' arm:=True'
         ]
     )
 
@@ -55,9 +55,9 @@ def generate_launch_description():
     )
 
     xavbot_controllers = [
-        'xavbot_platform_controller',
-        # 'xavbot_arm_controller',
-        # 'xavbot_gripper_controller'
+        'base_controller',
+        'arm_controller',
+        'gripper_controller'
     ]
 
     # Delay start of xavbot controllers after `joint_state_broadcaster`
@@ -68,15 +68,23 @@ def generate_launch_description():
         )
     )
 
-    # moveit_config = MoveItConfigsBuilder('xavbot', package_name='xavbot_moveit_config').to_moveit_configs()
-    # move_group = generate_move_group_launch(moveit_config)
+    moveit_config = MoveItConfigsBuilder('xavbot', package_name='xavbot_moveit_config').to_moveit_configs()
+    move_group = generate_move_group_launch(moveit_config)
+
+    temp_tf = Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='odom_to_base_static_tf',
+            arguments=['0', '0', '0', '0', '0', '0', 'odom', 'base_link']
+        )
 
     nodes = [
         control_node,
         robot_state_pub_node,
         joint_state_broadcaster_spawner,
         xavbot_controllers_spawner,
-        # move_group,
+        move_group,
+        temp_tf
     ]
 
     return LaunchDescription(nodes)

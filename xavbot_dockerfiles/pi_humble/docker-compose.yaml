@@ -10,7 +10,7 @@ services:
     volumes:
       - ~/xavbot_ws:/xavbot_ws
     devices:
-#      - "/dev/ttyUSB0:/dev/ttyUSB0"
+      - "/dev/ttyUSB0:/dev/ttyUSB0"
       - "/dev/ttyACM0:/dev/ttyACM0"
     network_mode: host
     working_dir: /xavbot_ws
