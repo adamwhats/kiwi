@@ -1,1 +1,0 @@
--v `realpath ~/.ssh`:/home/admin/.ssh -e XAVBOT_PI_IP=10.42.0.176 -e FASTRTPS_DEFAULT_PROFILES_FILE=/workspaces/isaac_ros-dev/src/xavbot/FASTRTPS_PROFILE.xml

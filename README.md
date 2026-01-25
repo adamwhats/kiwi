@@ -1,6 +1,6 @@
 # XavBot
 
-My journey into building a robot from scratch, with the initial aim of exploring the Nav2 framework. Future goals are experimenting with building my own SLAM and perception algorithms as well as Gazebo/ Isaac Sim simulation.
+My journey into building a robot from scratch, with the initial aim of exploring the Nav2 framework. Future goals are experimenting with building my own SLAM and perception algorithms.
 
 XavBot is a small holonomic robot based around the NVIDIA Jetson Xavier NX with ab Intel RealSense D435i RGB-D camera, RPLidar A1M8 lidar & Pimoroni Motor2040 motor control board. 
 
@@ -16,14 +16,30 @@ XavBot is a small holonomic robot based around the NVIDIA Jetson Xavier NX with 
 |[`xavbot_teleop`](https://github.com/adamwhats/xavbot/tree/main/xavbot_teleop)|A launch file and rviz config for operating xavbot with a dualshock 4 controller (TODO).|
 
 ## Setup Notes
-### Iptables Rules
- TODO - Implement method of automatically applying the rules at /etc/iptables/rules.v4 on the jetson
+### Jetson <-> Pi connection
+Setup a local wire connection between the jetson and pi
 
-### Isaac ROS Dev Environment
-This codebase is designed to work in the [NVIDIA Isaac ROS Docker Development Environment](https://nvidia-isaac-ros.github.io/repositories_and_packages/isaac_ros_common/index.html). To set this, run the [`setup_isaac_ros.bash`](/xavbot_dockerfiles/isaac_ros/setup_isaac_ros.bash) script.
-  
-## Bringup
-You can then bring up the system with:
-"""
-./src/isaac_ros_common/scripts/run_dev.sh 
-"""
+On jetson:
+```
+# Remove old connections
+sudo nmcli connection delete jetson-pi
+# Create shared connection
+sudo nmcli connection add type ethernet con-name jetson-pi ifname enP8p1s0 \
+  ipv4.method shared ipv4.addresses 10.42.0.1/24
+# Activate
+sudo nmcli connection up jetson-pi
+```
+
+On pi:
+```
+# Remove old connections
+sudo nmcli connection delete jetson-pi
+# Create shared connection
+sudo nmcli connection add type ethernet con-name jetson-pi ifname eth0 \
+  ipv4.method manual \
+  ipv4.addresses 10.42.0.2/24 \
+  ipv4.gateway 10.42.0.1 \
+  ipv4.dns "8.8.8.8,8.8.4.4"
+# Activate
+sudo nmcli connection up jetson-pi
+```

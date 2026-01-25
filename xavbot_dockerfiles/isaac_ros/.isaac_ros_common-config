@@ -1,2 +1,0 @@
-CONFIG_IMAGE_KEY=ros2_humble.realsense.xavbot
-CONFIG_DOCKER_SEARCH_DIRS=$ISAAC_ROS_WS/src/xavbot/xavbot_dockerfiles/isaac_ros

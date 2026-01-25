@@ -18,6 +18,6 @@ if [ "$REBUILD" = true ]; then
 fi
 
 # Add teleop alias
-echo "alias teleop='ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/xavbot_platform_controller/reference -p stamped:=True -p frame_id:=base_link'" >> ~/.bash_aliases
+echo "alias teleop='ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/base_controller/reference -p stamped:=True -p frame_id:=base_link'" >> ~/.bash_aliases
 
 exec "$@"

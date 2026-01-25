@@ -2,6 +2,7 @@ import os
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
 from launch.actions import IncludeLaunchDescription
 from launch.actions.execute_process import ExecuteProcess
 from launch.conditions import IfCondition, UnlessCondition
@@ -72,14 +73,26 @@ def generate_launch_description():
         condition=IfCondition(use_nav2)
     )
 
+    # Foxglove bridge
+    foxglove_bridge = IncludeLaunchDescription(
+        XMLLaunchDescriptionSource([
+            PathJoinSubstitution([
+                FindPackageShare('foxglove_bridge'),
+                'launch',
+                'foxglove_bridge_launch.xml'
+            ])
+        ])
+    )
+
 
     actions = [
         # xavbot_pi_remote_launch,
         # remote_launch_terminator,'
         vio_bringup,
-        lidar_bringup,
-        lidar_odom,
-        ekf,
+        foxglove_bridge
+        # lidar_bringup,
+        # lidar_odom,
+        # ekf,
         # nav2_bringup,
     ]
 
