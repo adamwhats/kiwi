@@ -10,15 +10,13 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
 
-  <depend>rclpy</depend>
-  <depend>dynamixel_hardware_interface</depend>
-  <depend>sllidar_ros2</depend>
+  <depend>foxglove_bridge</depend>
+  <depend>realsense2_camera</depend>
+  <depend>moveit-msgs</depend>
   <depend>xavbot_behavior</depend>
   <depend>xavbot_description</depend>
-  <depend>xavbot_hardware</depend>
-  <depend>xavbot_interfaces</depend>
-  <depend>xavbot_moveit_config</depend>
-  <depend>xavbot_perception</depend>
+  <!-- <depend>xavbot_interfaces</depend> -->
+  <!-- <depend>xavbot_perception</depend> -->
   
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

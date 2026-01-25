@@ -1,0 +1,15 @@
+# RPLidar A1 udev rule
+# CP2102 USB to UART Bridge Controller (idVendor=10c4, idProduct=ea60)
+#
+# This rule:
+# - Creates /dev/rplidar symlink
+# - Sets proper permissions (0666 allows all users to access)
+# - Configures serial port with correct settings for RPLidar communication
+#
+# The CP2102 chip requires DTR/RTS to be disabled for proper RPLidar operation
+
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", \
+    MODE="0666", \
+    SYMLINK+="rplidar", \
+    RUN+="/bin/sh -c 'echo 0 > /sys/class/tty/%k/device/latency_timer'", \
+    RUN+="/bin/stty -F /dev/%k 115200 raw -echo -echoe -echok -hupcl -clocal"

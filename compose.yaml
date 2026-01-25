@@ -6,6 +6,7 @@ services:
     env_file: .env
     volumes:
       - ~/workspaces/xavbot_ws:/xavbot_ws
+      - /dev:/dev
     network_mode: host
     shm_size: 512mb
     working_dir: /xavbot_ws
