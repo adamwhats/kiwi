@@ -15,13 +15,17 @@ def generate_launch_description():
     # Realsense
     realsense_node = Node(
         name='realsense',
+        namespace='camera',
         package='realsense2_camera',
         executable='realsense2_camera_node',
         parameters=[{
+            'camera_name': 'camera',
+            'base_frame_id': 'camera_link',
             'serial_no': '_008222072206',
             'depth_module.depth_profile': '1280x720x30',
             'pointcloud.enable': True,
             '_image_transport': 'compressed',
+            'publish_tf': True,
         }]
     )
 

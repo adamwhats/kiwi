@@ -7,7 +7,7 @@
   <xacro:include filename="$(find xavbot_description)/urdf/xavbot.platform.xacro" />
   <xacro:xavbot_platform prefix="$(arg prefix)" mesh_dir="package://xavbot_description/meshes" />
   <xacro:include filename="$(find realsense2_description)/urdf/_d435i.urdf.xacro"/>
-  <xacro:sensor_d435i parent="base_link" name="VIO_camera" use_nominal_extrinsics="false">
+  <xacro:sensor_d435i parent="base_link" name="camera" use_nominal_extrinsics="false">
     <origin xyz="0.024 -0.03 0.0985" rpy="0 0 0"/>
   </xacro:sensor_d435i>
 

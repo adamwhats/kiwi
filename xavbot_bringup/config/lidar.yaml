@@ -12,7 +12,7 @@
       use_intensities: false
       max_distance: 10.0
       dummy_mode: false
-      publish_tf: true
+      publish_tf: false
       qos_policy: "sensor_data"
       max_retries: 3
       angle_offset: 0.0
