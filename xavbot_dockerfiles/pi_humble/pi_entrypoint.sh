@@ -12,8 +12,8 @@ fi
 if [ "$REBUILD" = true ]; then
   colcon build \
   --symlink-install \
-  --packages-up-to xavbot_bringup realsense2_description \
-  --packages-ignore xavbot_behaviour xavbot_perception xavbot_teleop
+  --packages-up-to xavbot_bringup \
+  --packages-ignore xavbot_behaviour xavbot_perception xavbot_teleop realsense2_camera
   source "./install/setup.bash"
 fi
 

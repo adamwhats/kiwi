@@ -13,11 +13,15 @@ ENV PIP_INDEX_URL=https://pypi.jetson-ai-lab.io/jp6/cu126
 RUN apt-get update && apt-get install -y --no-install-recommends --fix-broken \
     libserial-dev \
     python3-pip \
+    ros-${ROS_DISTRO}-control-msgs \
+    ros-${ROS_DISTRO}-controller-manager \
     ros-${ROS_DISTRO}-diagnostic-updater \
     ros-${ROS_DISTRO}-foxglove-bridge \
     ros-${ROS_DISTRO}-moveit-msgs \
     ros-${ROS_DISTRO}-nav2-msgs \
+    ros-${ROS_DISTRO}-realsense2-camera-msgs \
     ros-${ROS_DISTRO}-robot-localization \
+    ros-${ROS_DISTRO}-std-srvs \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -48,3 +52,6 @@ RUN mkdir /opt/rplidar_ros2 && cd /opt/rplidar_ros2 && \
     colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --install-base ${ROS_ROOT}/install --merge-install
 
 RUN echo "if [ -f ./install/setup.bash ]; then source ./install/setup.bash; fi" >> ~/.bashrc
+
+RUN echo "alias pi-deploy='bash \$(find /xavbot_ws -name pi_deploy.sh -type f | head -n 1)'" >> ~/.bash_aliases
+RUN echo "alias launch='colcon build --packages-up-to xavbot_bringup && source ./install/setup.bash && ros2 launch xavbot_bringup jetson.launch.py'" >> ~/.bash_aliases
