@@ -12,6 +12,7 @@
     <xacro:property name="wheel_mass" value="0.02" /> <!-- arbitrary value for wheel mass -->
     <xacro:property name="wheel_length" value="0.024" />
     <xacro:property name="wheel_radius" value="0.0185" />
+    <xacro:property name="axel_to_base" value="0.00495" />
 
     <xacro:property name="half_width" value="${base_width / 2}" />
     <xacro:property name="half_length" value="${base_length / 2}" />
@@ -19,7 +20,7 @@
     <!-- Base Link -->
     <link name="${prefix}base_link">
       <collision>
-        <origin xyz="0 0 ${wheel_radius + 0.00495}" rpy="0 0 0"/>
+        <origin xyz="0 0 ${wheel_radius + axel_to_base}" rpy="0 0 0"/>
         <geometry>
           <box size="${base_length} ${base_width} ${2 * wheel_radius + 0.01}"/>
         </geometry>
@@ -148,8 +149,8 @@
     <joint name="${prefix}lidar_joint" type="fixed">
      <parent link="${prefix}base_link"/>
       <child link="${prefix}lidar"/>
-      <origin xyz="0.08 0.08 0.135" rpy="0 0 ${PI}"/>
-      <axis xyz="0 0 -1"/>
+      <origin xyz="${-half_length + 0.08} ${-half_width + 0.08} 0.1415" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
     </joint>
 
     <link name="${prefix}lidar"/>

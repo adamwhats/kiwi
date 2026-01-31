@@ -55,3 +55,73 @@ sudo nmcli connection add type ethernet con-name jetson-pi ifname eth0 \
 # Activate
 sudo nmcli connection up jetson-pi
 ```
+### Realsense udev rules
+```
+wget https://raw.githubusercontent.com/IntelRealSense/librealsense/master/config/99-realsense-libusb.rules
+sudo mv 99-realsense-libusb.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules && sudo udevadm trigger
+```
+
+### Prevent lidar auto-spin
+By default the RPLidar A1 begins spinning as soon as it is connected via USB. To prevent excessive wear, this service holds the RTS low to prevent this, but the ROS2 node is still able to take ownership of the port when launched.
+
+Add udev rule to symlink the device to `/dev/rplidar`:
+```
+sudo tee /etc/udev/rules.d/99-rplidar.rules << 'EOF'
+# RPLidar A1 - Create symlink
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="rplidar"
+EOF
+
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+```
+
+Create and enable the service:
+```
+sudo tee /usr/local/bin/rplidar-motor-off.py << 'EOF'
+#!/usr/bin/env python3
+import serial
+import time
+import sys
+
+while True:
+    try:
+        ser = serial.Serial('/dev/rplidar', 115200, timeout=1)
+        ser.rts = False
+        while True:
+            time.sleep(1)
+    except serial.SerialException:
+        time.sleep(1)  # Port busy (ROS2 using it), retry later
+    except KeyboardInterrupt:
+        sys.exit(0)
+EOF
+
+sudo chmod +x /usr/local/bin/rplidar-motor-off.py
+
+sudo tee /etc/systemd/system/rplidar-motor-off.service << 'EOF'
+[Unit]
+Description=Keep RPLidar motor off when idle
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/rplidar-motor-off.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable rplidar-motor-off.service
+sudo systemctl start rplidar-motor-off.service
+```
+
+Purge the service if needed
+```
+sudo systemctl stop rplidar-motor-off.service
+sudo systemctl disable rplidar-motor-off.service
+sudo rm /etc/systemd/system/rplidar-motor-off.service
+sudo rm /usr/local/bin/rplidar-motor-off.py
+sudo systemctl daemon-reload
+sudo systemctl reset-failed
+```
