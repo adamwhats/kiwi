@@ -9,19 +9,60 @@ RUN mkdir -p /etc/apt/keyrings && \
 # Configure pip to use correct Jetson PyPI server
 ENV PIP_INDEX_URL=https://pypi.jetson-ai-lab.io/jp6/cu126
 
-# Install dependencies
+# Build librealsense with LibUVC backend, necessary to get IMU working on JP6
+RUN mkdir -p /etc/udev/rules.d && \
+    cd /root && \
+    git clone https://github.com/realsenseai/librealsense.git && \
+    cd librealsense && \
+    chmod +x scripts/libuvc_installation.sh && \
+    echo "" | ./scripts/libuvc_installation.sh && \
+    cd / && rm -rf /root/librealsense_build /root/librealsense
+
+# Build realsense-ros
+ENV CMAKE_PREFIX_PATH=${ROS_ROOT}:$CMAKE_PREFIX_PATH
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-${ROS_DISTRO}-diagnostic-updater && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /opt/realsense_ros && cd /opt/realsense_ros && \
+    git clone https://github.com/IntelRealSense/realsense-ros.git -b r/4.56.4 src && \
+    . /opt/ros/${ROS_DISTRO}/install/setup.bash && \
+    colcon build --packages-up-to realsense2_camera --cmake-args -DCMAKE_BUILD_TYPE=Release --install-base ${ROS_ROOT}/install --merge-install
+
+# # Build OpenVINS
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#     libceres-dev libeigen3-dev libboost-all-dev && \
+#     apt-get clean && rm -rf /var/lib/apt/lists/* && \
+#     mkdir -p /opt/openvins && cd /opt/openvins && \
+#     git clone https://github.com/rpng/open_vins.git src && \
+#     . /opt/ros/${ROS_DISTRO}/install/setup.bash && \
+#     colcon build --packages-up-to ov_msckf --parallel-workers 1 --cmake-args -DCMAKE_BUILD_TYPE=Release --install-base ${ROS_ROOT}/install --merge-install
+
+# Build rplidar_ros2
+RUN mkdir -p /opt/rplidar_ros2 && cd /opt/rplidar_ros2 && \
+    git clone https://github.com/frozenreboot/rplidar_ros2_driver.git src && \
+    . /opt/ros/${ROS_DISTRO}/install/setup.bash && \
+    colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --install-base ${ROS_ROOT}/install --merge-install
+
+# Build rf2o_laser_odometry
+RUN mkdir -p /opt/rf2o_laser_odometry && cd /opt/rf2o_laser_odometry && \
+    git clone https://github.com/MAPIRlab/rf2o_laser_odometry.git src && \
+    . /opt/ros/${ROS_DISTRO}/install/setup.bash && \
+    colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --install-base ${ROS_ROOT}/install --merge-install
+
+# Install other local dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends --fix-broken \
     libserial-dev \
     python3-pip \
     ros-${ROS_DISTRO}-control-msgs \
-    ros-${ROS_DISTRO}-controller-manager \
-    ros-${ROS_DISTRO}-diagnostic-updater \
+    ros-${ROS_DISTRO}-dynamixel-interfaces \
     ros-${ROS_DISTRO}-foxglove-bridge \
     ros-${ROS_DISTRO}-moveit-msgs \
     ros-${ROS_DISTRO}-nav2-msgs \
     ros-${ROS_DISTRO}-realsense2-camera-msgs \
     ros-${ROS_DISTRO}-robot-localization \
     ros-${ROS_DISTRO}-std-srvs \
+    rsync \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -29,29 +70,7 @@ RUN pip install \
     pyserial \
     setuptools==58.2.0
 
-# Build realsense-ros
-ENV CMAKE_PREFIX_PATH=${ROS_ROOT}:$CMAKE_PREFIX_PATH
-
-RUN curl -sSf https://librealsense.realsenseai.com/Debian/librealsenseai.asc | \
-        gpg --dearmor | sudo tee /etc/apt/keyrings/librealsenseai.gpg > /dev/null && \
-    echo "deb [signed-by=/etc/apt/keyrings/librealsenseai.gpg] https://librealsense.realsenseai.com/Debian/apt-repo `lsb_release -cs` main" | \
-        sudo tee /etc/apt/sources.list.d/librealsense.list && \
-    apt-get update && \
-    apt-get install -y librealsense2-utils librealsense2-dev && \
-    mkdir -p /opt/realsense_ws && cd /opt/realsense_ws && \
-    git clone https://github.com/IntelRealSense/realsense-ros.git -b r/4.56.4 src && \
-    . /opt/ros/${ROS_DISTRO}/install/setup.bash && \
-    colcon build --packages-up-to realsense2_camera --cmake-args -DCMAKE_BUILD_TYPE=Release --install-base ${ROS_ROOT}/install --merge-install
-
-# Build rplidar_ros2
-RUN mkdir /opt/rplidar_ros2 && cd /opt/rplidar_ros2 && \
-    git clone https://github.com/frozenreboot/rplidar_ros2_driver.git src && \
-    rosdep update && \
-    rosdep install --from-paths src --ignore-src -r -y && \
-    . /opt/ros/${ROS_DISTRO}/install/setup.bash && \
-    colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --install-base ${ROS_ROOT}/install --merge-install
-
+# Bash helpers
 RUN echo "if [ -f ./install/setup.bash ]; then source ./install/setup.bash; fi" >> ~/.bashrc
-
 RUN echo "alias pi-deploy='bash \$(find /xavbot_ws -name pi_deploy.sh -type f | head -n 1)'" >> ~/.bash_aliases
 RUN echo "alias launch='colcon build --packages-up-to xavbot_bringup && source ./install/setup.bash && ros2 launch xavbot_bringup jetson.launch.py'" >> ~/.bash_aliases

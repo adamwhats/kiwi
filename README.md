@@ -116,7 +116,7 @@ sudo systemctl enable rplidar-motor-off.service
 sudo systemctl start rplidar-motor-off.service
 ```
 
-Purge the service if needed
+Purge the service if needed:
 ```
 sudo systemctl stop rplidar-motor-off.service
 sudo systemctl disable rplidar-motor-off.service
@@ -124,4 +124,16 @@ sudo rm /etc/systemd/system/rplidar-motor-off.service
 sudo rm /usr/local/bin/rplidar-motor-off.py
 sudo systemctl daemon-reload
 sudo systemctl reset-failed
+```
+
+### Building Docker container
+OpenVins takes a lot of RAM to build, and is more likely to be successful if additional swap memory is added, and is built via the Docker CLI rather than the devcontainer.
+```
+sudo fallocate -l 16G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+docker compose -f src/xavbot/compose.yaml build jetson
+sudo swapoff /swapfile
+sudo rm /swapfile
 ```

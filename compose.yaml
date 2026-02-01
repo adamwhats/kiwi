@@ -7,12 +7,15 @@ services:
     volumes:
       - ~/workspaces/xavbot_ws:/xavbot_ws
       - /dev:/dev
-    network_mode: host
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
     shm_size: 512mb
     working_dir: /xavbot_ws
     environment:
       - ROS_WORKSPACE=/xavbot_ws
       - REBUILD=true
+    cap_add:
+      - SYS_ADMIN
     command: ros2 launch xavbot_bringup xavbot.launch.py
     restart: unless-stopped
     stdin_open: true

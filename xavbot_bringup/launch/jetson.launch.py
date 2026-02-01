@@ -1,7 +1,7 @@
 import os
 
 from launch import LaunchDescription
-from launch.actions import GroupAction, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDescription
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
@@ -22,9 +22,14 @@ def generate_launch_description():
             'base_frame_id': 'link',
             'serial_no': '_008222072206',
             'depth_module.depth_profile': '640x480x30',
-            'rgb_camera.color_profile': '640x480x30',
+            'rgb_camera.color_profile': '1280x720x30',
             'enable_infra1': False,
             'enable_infra2': False,
+            'enable_gyro': True,
+            'enable_accel': True,
+            'gyro_fps': 200,
+            'accel_fps': 63,
+            'unite_imu_method': 2,
             'pointcloud.enable': True,
             '_image_transport': 'compressed',
             'publish_tf': True,
@@ -42,30 +47,14 @@ def generate_launch_description():
 
     lidar_with_ns = GroupAction([PushRosNamespace('rplidar'), lidar_node])
 
-    # lidar_odom = Node(
-    #     package='rf2o_laser_odometry',
-    #     executable='rf2o_laser_odometry_node',
-    #     name='rf2o_laser_odometry',
-    #     output='screen',
-    #     parameters=[{
-    #         'laser_scan_topic': '/scan',
-    #         'odom_topic': '/rf2o_odom',
-    #         'publish_tf': False,
-    #         'base_frame_id' : 'base_link',
-    #         'init_pose_from_topic' : '',
-    #         'freq' : 8.0
-    #     }],
-    #     arguments=['--ros-args', '--log-level', 'error']
-    # )
+    # Odometry
+    use_odometry = LaunchConfiguration('odometry', default=True)
 
-    # # EKF
-    # ekf = Node(
-    #     package='robot_localization',
-    #     executable='ekf_node',
-    #     name='ekf_filter_node',
-    #     output='screen',
-    #     parameters=[PathJoinSubstitution([FindPackageShare('xavbot_bringup'), 'config', 'ekf.yaml'])],
-    # )
+    odometry_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            launch_file_path=PathJoinSubstitution([FindPackageShare('xavbot_bringup'), 'launch', 'odom.launch.py'])),
+        condition=IfCondition(use_odometry)
+    )
 
     # Navigation
     use_nav2 = LaunchConfiguration('navigation', default=False)
@@ -92,5 +81,6 @@ def generate_launch_description():
     return LaunchDescription([
         realsense_node,
         lidar_with_ns,
+        odometry_launch,
         foxglove_bridge,
     ])

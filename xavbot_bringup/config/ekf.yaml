@@ -1,8 +1,9 @@
 /**:
   ros__parameters:
    
-    frequency: 50.0
+    frequency: 25.0
     sensor_timeout: 0.5
+    two_d_mode: true
     publish_tf: true
     publish_acceleration: false
 
@@ -11,26 +12,39 @@
     base_link_frame: base_link
     world_frame: odom
 
-    # Lidar odom used for position only
-    odom0: /rf2o_odom
-    odom0_differential: false
+    # Wheel odometry - 2D velocity
+    odom0: /base_controller/odometry
     odom0_queue_size: 5
-    odom0_config: [true,  true,  false,
-                   false, false, true,
-                   false, false, false,
-                   false, false, false,
-                   false, false, false]
+    odom0_differential: false
+    odom0_config: [
+      false, false, false,
+      false, false, false,
+      true,  true,  false,
+      false, false, true,
+      false, false, false
+    ]
 
-    # Wheel odom used for position and velocity
-    odom1: /xavbot_platform_controller/odometry
+    # Lidar odom - 2D position
+    odom1: /rf2o/odom_with_covariance
     odom1_differential: false
-    odom1_queue_size: 20
+    odom1_queue_size: 5
     odom1_config: [true,  true,  false,
                    false, false, true,
-                   true,  true,  false,
-                   false, false, true,
+                   false, false, false,
+                   false, false, false,
                    false, false, false]
 
+    # IMU from RealSense - Yaw velocity
+    imu0: /camera/realsense/imu
+    imu0_queue_size: 20
+    imu0_differential: false
+    imu0_config: [
+      false, false, false,
+      false, false, false,
+      false, false, false,
+      false, false, true,
+      false, false, false
+    ]
 
     process_noise_covariance: [0.05, 0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
                                0.0,  0.05,   0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
