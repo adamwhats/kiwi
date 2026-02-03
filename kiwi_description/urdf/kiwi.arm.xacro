@@ -1,0 +1,235 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="kiwi">
+
+  <xacro:macro name="kiwi_arm" params="prefix='' mesh_dir='package://kiwi_description/meshes' standalone='true'">
+
+  <!-- Constants for robot dimensions -->
+  <xacro:property name="PI" value="3.1415926535897931"/>
+
+      <!-- link0 -->
+      <xacro:if value="${standalone}">
+        <link name="${prefix}base_link" />
+        <joint name="${prefix}link0_joint" type="fixed">
+          <parent link="${prefix}base_link"/>
+          <child link="${prefix}link0"/>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+        </joint>
+      </xacro:if>
+
+      <xacro:unless value="${standalone}">
+        <joint name="${prefix}link0_joint" type="fixed">
+          <parent link="${prefix}base_link"/>
+          <child link="${prefix}link0"/>
+          <origin xyz="0.07425 0.076 0.05195" rpy="0 0 0"/>
+        </joint>
+      </xacro:unless>
+
+      <link name="${prefix}link0">
+        <collision>
+          <origin xyz="0 0 0.02325" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.0285 0.04 0.0465"/>
+          </geometry>
+        </collision>
+
+        <visual>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <geometry>
+            <mesh filename="${mesh_dir}/link0.dae" scale="1 1 1"/>
+          </geometry>
+        </visual>
+    
+      </link>
+
+      <!-- link1 -->
+      <joint name="${prefix}link1_joint" type="revolute">
+        <parent link="${prefix}link0"/>
+        <child link="${prefix}link1"/>
+        <origin xyz="0 0 0.03525" rpy="${PI / 2} 0 0"/>
+        <axis xyz="0 0 1"/>
+        <dynamics damping="0.2"/>
+        <limit
+          lower="${-PI/2}"
+          upper="${PI/2}"
+          effort="4.0"
+          velocity="5.5">
+        </limit>
+      </joint>
+
+      <link name="${prefix}link1">
+        <collision>
+          <origin xyz="0 0.0585 0" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.0285 0.1455 0.044"/>
+          </geometry>
+        </collision>
+
+        <visual>
+          <origin xyz="0 0 0" rpy="0 ${PI} 0"/>
+          <geometry>
+            <mesh filename="${mesh_dir}/link1.dae" scale="1 1 1"/>
+          </geometry>
+        </visual>
+
+      </link>
+
+      <!-- link2 -->
+      <joint name="${prefix}link2_joint" type="revolute">
+        <parent link="${prefix}link1"/>
+        <child link="${prefix}link2"/>
+        <origin xyz="0 0.12 0" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/>
+        <dynamics damping="0.2"/>
+        <limit
+          lower="${-PI/2}"
+          upper="${PI/2}"
+          effort="4.0"
+          velocity="5.5">
+        </limit>
+      </joint>
+
+      <link name="${prefix}link2">
+        <collision>
+          <origin xyz="0 0.015 0" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.0285 0.0585 0.044"/>
+          </geometry>
+        </collision>
+          <collision>
+          <origin xyz="0.0535 0.03 0" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.1355 0.0285 0.044"/>
+          </geometry>
+        </collision>
+
+        <visual>
+          <origin xyz="0 0 0" rpy="0 ${PI} 0"/>
+          <geometry>
+            <mesh filename="${mesh_dir}/link2.dae" scale="1 1 1"/>
+          </geometry>
+        </visual>
+      </link>
+
+      <!-- link3 -->
+      <joint name="${prefix}link3_joint" type="revolute">
+        <parent link="${prefix}link2"/>
+        <child link="${prefix}link3"/>
+        <origin xyz="0.11 0.03 0" rpy="0 0 ${-PI/2}"/>
+        <axis xyz="0 0 -1 "/>
+        <dynamics damping="0.2"/>
+        <limit
+          lower="-${PI/2}"
+          upper="${PI/2}"
+          effort="4.0"
+          velocity="5.5">
+        </limit>
+      </joint>
+
+      <link name="${prefix}link3">
+        <collision>
+          <origin xyz="0 0.016875 0" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.0285 0.06225 0.044"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0.0535 -0.0075" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.01 0.011 0.1"/>
+          </geometry>
+        </collision>
+
+        <visual>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <geometry>
+            <mesh filename="${mesh_dir}/link3.dae" scale="1 1 1"/>
+          </geometry>
+        </visual>
+      </link>
+
+      <!-- gripper_virtual -->
+      <link name="${prefix}gripper_virtual"/>
+      <joint name="${prefix}gripper_virtual_joint" type="prismatic">
+        <parent link="${prefix}link3"/>
+        <child link="${prefix}gripper_virtual"/>
+        <origin xyz="0 0 0" rpy="0 0 ${PI/2}"/>
+        <axis xyz="1 0 0"/>
+        <limit 
+          lower="0.0" 
+          upper="0.055"
+          effort="4.0"
+          velocity="0.1"/>
+      </joint>
+
+      <!-- gripper_tcp -->
+      <link name="${prefix}gripper_tcp"/>
+      <joint name="${prefix}gripper_tcp_joint" type="fixed">
+        <parent link="${prefix}link3"/>
+        <child link="${prefix}gripper_tcp"/>
+        <origin xyz="0 0.105 -0.0075" rpy="${-PI/2} 0 ${PI/2}"/>
+      </joint>
+
+      <!-- rightfinger -->
+      <joint name="${prefix}rightfinger_joint" type="prismatic">
+        <parent link="${prefix}link3"/>
+        <child link="${prefix}rightfinger"/>
+        <mimic joint="${prefix}gripper_virtual_joint" multiplier="0.5"/>
+        <origin xyz="0 0.059 0.00375" rpy="${-PI/2} ${-PI/2} 0"/>
+        <axis xyz="1 0 0 "/>
+        <limit 
+          lower="0.0" 
+          upper="0.0275"
+          velocity="0.05"
+          effort="2.0"/>
+      </joint>
+
+      <link name="${prefix}rightfinger">
+        <collision>
+          <origin xyz="-0.00975 0 0.02657" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.003 0.017 0.05314"/>
+          </geometry>
+        </collision>
+
+        <visual>
+          <origin xyz="0 0 0" rpy="0 0 ${-PI/2}"/>
+          <geometry>
+            <mesh filename="${mesh_dir}/finger.dae" scale="1 1 1"/>
+          </geometry>
+        </visual>
+      </link>
+
+      <!-- leftfinger -->
+      <joint name="${prefix}leftfinger_joint" type="prismatic">
+        <parent link="${prefix}link3"/>
+        <child link="${prefix}leftfinger"/>
+        <mimic joint="${prefix}gripper_virtual_joint" multiplier="0.5"/>
+        <origin xyz="0 0.059 -0.01875" rpy="${-PI/2} ${PI/2} 0"/>
+        <axis xyz="1 0 0 "/>
+        <limit 
+          lower="0.0" 
+          upper="0.0275"
+          velocity="0.05"
+          effort="2.0"/>
+      </joint>
+
+      <link name="${prefix}leftfinger">
+        <collision>
+          <origin xyz="-0.00975 0 0.02657" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.003 0.017 0.05314"/>
+          </geometry>
+        </collision>
+
+        <visual>
+          <origin xyz="0 0 0" rpy="0 0 ${-PI/2}"/>
+          <geometry>
+            <mesh filename="${mesh_dir}/finger.dae" scale="1 1 1"/>
+          </geometry>
+        </visual>
+      </link>
+
+
+  </xacro:macro>
+
+</robot>

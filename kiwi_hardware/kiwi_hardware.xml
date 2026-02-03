@@ -1,0 +1,9 @@
+<library path="kiwi_hardware">
+  <class name="kiwi_hardware/KiwiHardware"
+         type="kiwi_hardware_interface::KiwiHardware"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Hardware Interface for Motor2040 running https://github.com/adamwhats/motor2040_serial
+    </description>
+  </class>
+</library>

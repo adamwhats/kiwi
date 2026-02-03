@@ -1,22 +1,22 @@
 services:
   jetson:
     build:
-      context: ~/workspaces/xavbot_ws
-      dockerfile: src/xavbot/xavbot_dockerfiles/jetson_humble/Dockerfile
+      context: ~/workspaces/kiwi_ws
+      dockerfile: src/kiwi/kiwi_dockerfiles/jetson_humble/Dockerfile
     env_file: .env
     volumes:
-      - ~/workspaces/xavbot_ws:/xavbot_ws
+      - ~/workspaces/kiwi_ws:/kiwi_ws
       - /dev:/dev
     devices:
       - /dev/bus/usb:/dev/bus/usb
     shm_size: 512mb
-    working_dir: /xavbot_ws
+    working_dir: /kiwi_ws
     environment:
-      - ROS_WORKSPACE=/xavbot_ws
+      - ROS_WORKSPACE=/kiwi_ws
       - REBUILD=true
     cap_add:
       - SYS_ADMIN
-    command: ros2 launch xavbot_bringup xavbot.launch.py
+    command: ros2 launch kiwi_bringup kiwi.launch.py
     restart: unless-stopped
     stdin_open: true
     tty: true
@@ -25,7 +25,7 @@ services:
     image: ros:humble-navigation
     env_file: .env
     volumes:
-      - ~/workspaces/xavbot_ws/src/xavbot/xavbot_bringup/config/nav2_params.yaml:/nav2_params.yaml:ro
+      - ~/workspaces/kiwi_ws/src/kiwi/kiwi_bringup/config/nav2_params.yaml:/nav2_params.yaml:ro
     network_mode: host
     shm_size: 512mb
     command: >
@@ -40,24 +40,24 @@ services:
 
   pi:
     build:
-      context: ~/xavbot_ws
-      dockerfile: src/xavbot/xavbot_dockerfiles/pi_humble/Dockerfile
+      context: ~/kiwi_ws
+      dockerfile: src/kiwi/kiwi_dockerfiles/pi_humble/Dockerfile
     env_file: .env
     cap_add:
       - SYS_NICE
       - IPC_LOCK
       - SYS_RESOURCE
     volumes:
-      - ~/xavbot_ws:/xavbot_ws
+      - ~/kiwi_ws:/kiwi_ws
     devices:
       - "/dev/ttyUSB0:/dev/ttyUSB0"
       - "/dev/ttyACM0:/dev/ttyACM0"
     network_mode: host
-    working_dir: /xavbot_ws
+    working_dir: /kiwi_ws
     environment:
       - REBUILD=true
-    entrypoint: src/xavbot/xavbot_dockerfiles/pi_humble/pi_entrypoint.sh
-    command: ros2 launch xavbot_bringup pi.launch.py
+    entrypoint: src/kiwi/kiwi_dockerfiles/pi_humble/pi_entrypoint.sh
+    command: ros2 launch kiwi_bringup pi.launch.py
     restart: unless-stopped
     stdin_open: true
     tty: true

@@ -1,0 +1,27 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: kiwi_description
+    relative_path: urdf/kiwi.urdf.xacro
+  srdf:
+    relative_path: config/kiwi.srdf
+  package_settings:
+    author_name: Adam Watts
+    author_email: adamlwatts@msn.com
+    generated_timestamp: 1753818214
+  control_xacro:
+    command:
+      - position
+      - velocity
+    state:
+      - position
+      - velocity
+  modified_urdf:
+    xacros:
+      - control_xacro
+  control_xacro:
+    command:
+      - position
+      - velocity
+    state:
+      - position
+      - velocity

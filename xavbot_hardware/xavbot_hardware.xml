@@ -1,9 +1,0 @@
-<library path="xavbot_hardware">
-  <class name="xavbot_hardware/XavbotHardware"
-         type="xavbot_hardware_interface::XavbotHardware"
-         base_class_type="hardware_interface::SystemInterface">
-    <description>
-      Hardware Interface for Motor2040 running https://github.com/adamwhats/motor2040_serial
-    </description>
-  </class>
-</library>

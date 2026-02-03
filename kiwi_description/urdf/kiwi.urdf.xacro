@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="kiwi">
+  <xacro:arg name="prefix" default="" />
+  <xacro:arg name="arm" default="true" />
+
+  <!-- Import Geometry -->
+  <xacro:include filename="$(find kiwi_description)/urdf/kiwi.platform.xacro" />
+  <xacro:kiwi_platform prefix="$(arg prefix)" mesh_dir="package://kiwi_description/meshes" />
+  <xacro:include filename="$(find realsense2_description)/urdf/_d435i.urdf.xacro"/>
+  <xacro:sensor_d435i parent="base_link" name="camera" use_nominal_extrinsics="false">
+    <origin xyz="0.024 -0.03 0.0985" rpy="0 0 0"/>
+  </xacro:sensor_d435i>
+
+  <!-- Import kiwi ros2_control description -->
+  <xacro:include filename="$(find kiwi_description)/urdf/kiwi.platform.ros2_control.xacro" />
+  <xacro:kiwi_platform_control name="kiwi_platform" prefix="$(arg prefix)" />
+
+  <!-- Import kiwi_arm -->
+  <xacro:if value="$(arg arm)">
+
+    <!-- Import Geometry -->
+    <xacro:include filename="$(find kiwi_description)/urdf/kiwi.arm.xacro" />
+    <xacro:kiwi_arm prefix="$(arg prefix)" mesh_dir="package://kiwi_description/meshes" standalone="false" />
+
+    <!-- Import kiwi ros2_control description -->
+    <xacro:include filename="$(find kiwi_description)/urdf/kiwi.arm.ros2_control.xacro" />
+    <xacro:kiwi_arm_control name="kiwi_arm" prefix="$(arg prefix)" />
+
+  </xacro:if>
+
+</robot>

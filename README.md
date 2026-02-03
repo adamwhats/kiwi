@@ -1,31 +1,27 @@
-# XavBot
+# Kiwi
 
-My journey into building a robot from scratch, with the initial aim of exploring the Nav2 framework. Future goals are experimenting with building my own SLAM and perception algorithms.
+My journey into building a robot from scratch, with the initial aim of exploring the Nav2 framework and mobile manipulation.
 
-XavBot is a small holonomic robot based around the NVIDIA Jetson Xavier NX with ab Intel RealSense D435i RGB-D camera, RPLidar A1M8 lidar & Pimoroni Motor2040 motor control board. 
+Kiwi is a small holonomic robot based around the NVIDIA Jetson Orin Nano with an Intel RealSense D435i RGB-D camera and RPLidar A1M8 lidar. Hardware is controlled by a Raspberry Pi 4, which drives a 3-DoF arm using Dynmixel Servos and a Pimoroni Motor2040 motor control board for the mecanum wheels.
 
-# Todo
-- Fix base_link > lidar transform
-- Get realsense description package working in pi container and also foxglove
-- Make sure realsesne tf frames are correct, potential namespacing issue
-- Implement VIO
-- Nav2 basic setup
-- Investigate action interfaces for nav2 and moveit2
+![](kiwi_foxglove.png)
 
 # Packages
 
 | Name | Description |
 | :----: | --- |
-|[`xavbot_bringup`](https://github.com/adamwhats/xavbot/tree/main/xavbot_description)|Contains the launch and configuration files.|
-|[`xavbot_controller`](https://github.com/adamwhats/xavbot/tree/main/xavbot_controller)|The kinematic controller for mecanum wheels.|
-|[`xavbot_description`](https://github.com/adamwhats/xavbot/tree/main/xavbot_description)|URDF xacros that describe the physical geometry and ros2_control interfaces.|
-|[`xavbot_dockerfiles`](https://github.com/adamwhats/xavbot/tree/main/xavbot_dockerfiles)|Dockerfiles for both xavbot itself and teleop on a remote machine.|
-|[`xavbot_hardware`](https://github.com/adamwhats/xavbot/tree/main/xavbot_hardware)|Hardware interface for driving the Motor2040 board. Written with lots of guidance from the excellent series by [Articulated Robotics](https://www.youtube.com/c/ArticulatedRobotics).|
-|[`xavbot_teleop`](https://github.com/adamwhats/xavbot/tree/main/xavbot_teleop)|A launch file and rviz config for operating xavbot with a dualshock 4 controller (TODO).|
+|[`kiwi_bringup`](https://github.com/adamwhats/kiwi/tree/main/kiwi_description)|Contains the launch and configuration files.|
+|[`kiwi_controller`](https://github.com/adamwhats/kiwi/tree/main/kiwi_controller)|The kinematic controller for mecanum wheels.|
+|[`kiwi_description`](https://github.com/adamwhats/kiwi/tree/main/kiwi_description)|URDF xacros that describe the physical geometry and ros2_control interfaces.|
+|[`kiwi_dockerfiles`](https://github.com/adamwhats/kiwi/tree/main/kiwi_dockerfiles)|Dockerfiles for both kiwi itself and teleop on a remote machine.|
+|[`kiwi_hardware`](https://github.com/adamwhats/kiwi/tree/main/kiwi_hardware)|Hardware interface for driving the Motor2040 board. Written with lots of guidance from the excellent series by [Articulated Robotics](https://www.youtube.com/c/ArticulatedRobotics).|
+|[`kiwi_teleop`](https://github.com/adamwhats/kiwi/tree/main/kiwi_teleop)|A launch file and rviz config for operating kiwi with a dualshock 4 controller (TODO).|
 
 ## Setup Notes
-### Jetson <-> Pi connection
-Setup a local wire connection between the jetson and pi
+This is more for my benefit rather than anyone else
+<details>
+<summary> Jetson <-> Pi connection </summary>
+Setup a local wired connection between the jetson and pi
 
 On jetson:
 ```
@@ -55,14 +51,19 @@ sudo nmcli connection add type ethernet con-name jetson-pi ifname eth0 \
 # Activate
 sudo nmcli connection up jetson-pi
 ```
-### Realsense udev rules
+</details>
+
+<details>
+<summary> Realsense udev rules </summary>
 ```
 wget https://raw.githubusercontent.com/IntelRealSense/librealsense/master/config/99-realsense-libusb.rules
 sudo mv 99-realsense-libusb.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules && sudo udevadm trigger
 ```
+</details>
 
-### Prevent lidar auto-spin
+<details>
+<summary> Prevent lidar auto-spin </summary>
 By default the RPLidar A1 begins spinning as soon as it is connected via USB. To prevent excessive wear, this service holds the RTS low to prevent this, but the ROS2 node is still able to take ownership of the port when launched.
 
 Add udev rule to symlink the device to `/dev/rplidar`:
@@ -125,15 +126,18 @@ sudo rm /usr/local/bin/rplidar-motor-off.py
 sudo systemctl daemon-reload
 sudo systemctl reset-failed
 ```
+</details>
 
-### Building Docker container
+<details>
+<summary> Building Docker container</summary>
 Rtabmap takes a lot of RAM to build, and is more likely to be successful if additional swap memory is added, and is built via the Docker CLI rather than the devcontainer.
 ```
 sudo fallocate -l 16G /swapfile
 sudo chmod 600 /swapfile
 sudo mkswap /swapfile
 sudo swapon /swapfile
-docker compose -f src/xavbot/compose.yaml build jetson
+docker compose -f src/kiwi/compose.yaml build jetson
 sudo swapoff /swapfile
 sudo rm /swapfile
 ```
+<details>
