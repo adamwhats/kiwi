@@ -127,7 +127,7 @@ sudo systemctl reset-failed
 ```
 
 ### Building Docker container
-OpenVins takes a lot of RAM to build, and is more likely to be successful if additional swap memory is added, and is built via the Docker CLI rather than the devcontainer.
+Rtabmap takes a lot of RAM to build, and is more likely to be successful if additional swap memory is added, and is built via the Docker CLI rather than the devcontainer.
 ```
 sudo fallocate -l 16G /swapfile
 sudo chmod 600 /swapfile
