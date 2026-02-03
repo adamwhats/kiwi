@@ -7,8 +7,8 @@
       angle_compensate: true
       scan_mode: "Standard"
       rpm: 0
-      interpolated_rays: false
-      computed_ray_count: 1450
+      interpolated_rays: true
+      computed_ray_count: 1012
       use_intensities: false
       max_distance: 10.0
       dummy_mode: false

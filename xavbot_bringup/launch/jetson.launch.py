@@ -49,13 +49,10 @@ def generate_launch_description():
 
     lidar_with_ns = GroupAction([PushRosNamespace('rplidar'), lidar_node])
 
-    # Odometry
-    use_odometry = LaunchConfiguration('odometry', default=True)
-
-    odometry_launch = IncludeLaunchDescription(
+    # Slam
+    slam_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            launch_file_path=PathJoinSubstitution([FindPackageShare('xavbot_bringup'), 'launch', 'odom.launch.py'])),
-        condition=IfCondition(use_odometry)
+            launch_file_path=PathJoinSubstitution([FindPackageShare('xavbot_bringup'), 'launch', 'slam.launch.py'])),
     )
 
     # Navigation
@@ -83,6 +80,6 @@ def generate_launch_description():
     return LaunchDescription([
         realsense_node,
         lidar_with_ns,
-        odometry_launch,
+        slam_launch,
         foxglove_bridge,
     ])

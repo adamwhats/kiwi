@@ -80,8 +80,8 @@ def generate_launch_description():
             # Sensors to use
             'subscribe_rgb': True,
             'subscribe_depth': True,
-            'subscribe_scan': False,
-            'subscribe_imu': True,
+            'subscribe_scan': True,
+            'subscribe_imu': False,
 
             # Synchronization
             'approx_sync': True,
@@ -90,29 +90,47 @@ def generate_launch_description():
             'sync_queue_size': 30,
 
             # Best effort
-            'qos': 1,
-            'qos_imu': 1,
+            'qos': 2,
+            'qos_scan': 2,
 
             # SLAM parameters
             'RGBD/NeighborLinkRefining': 'true',
             'Reg/Force3DoF': 'true',
 
-            # IMU constraints
-            'Optimizer/GravitySigma': '0.3',
-
             # Loop closure tuning
             'RGBD/AngularUpdate': '0.05',
             'RGBD/LinearUpdate': '0.05',
             'RGBD/OptimizeFromGraphEnd': 'true',
+            'RGBD/ProximityBySpace': 'true',
 
+            # Feature matching
+            'Vis/MaxFeatures': '1000',
+            'Vis/MinInliers': '20',
+            'Reg/Strategy': '2',
+
+            # ICP scan matching
+            'Icp/MaxCorrespondenceDistance': '0.1',
+            'Icp/Iterations': '30',
+            'Icp/VoxelSize': '0.05',
+
+            # Grid/OctoMap
+            'Grid/3D': 'true',
+            'Grid/Sensor': '2',
+            'Grid/RayTracing': 'true',
+            'Grid/MaxGroundHeight': '0.1',
+            'Grid/MaxObstacleHeight': '2.0',
+            'Grid/RangeMin': '0.1',
+            'Grid/RangeMax': '3.0',
+
+            # Saved map path
             'database_path': '',
         }],
         remappings=[
-            ('odom', '/odometry/filtered'),
-            ('rgb/image', '/camera/realsense/color/image_raw'),
             ('depth/image', '/camera/realsense/aligned_depth_to_color/image_raw'),
+            ('odom', '/odometry/filtered'),
             ('rgb/camera_info', '/camera/realsense/color/camera_info'),
-            ('imu', '/camera/realsense/imu'),
+            ('rgb/image', '/camera/realsense/color/image_raw'),
+            ('scan', '/rplidar/scan')
         ],
     )
 
