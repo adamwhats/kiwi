@@ -2,7 +2,7 @@
 
 My journey into building a robot from scratch, with the initial aim of exploring the Nav2 framework and mobile manipulation.
 
-Kiwi is a small holonomic robot based around the NVIDIA Jetson Orin Nano with an Intel RealSense D435i RGB-D camera and RPLidar A1M8 lidar. Hardware is controlled by a Raspberry Pi 4, which drives a 3-DoF arm using Dynmixel Servos and a Pimoroni Motor2040 motor control board for the mecanum wheels.
+Kiwi is a small holonomic robot based around the NVIDIA Jetson Orin Nano with an Intel RealSense D435i camera and RPLidar A1M8 lidar. Hardware is controlled by a Raspberry Pi 4, which drives a 3-DoF arm using Dynmaixel Servos and a Pimoroni Motor2040 motor control board for the mecanum wheels.
 
 ![](kiwi_foxglove.png)
 
@@ -21,6 +21,7 @@ Kiwi is a small holonomic robot based around the NVIDIA Jetson Orin Nano with an
 This is more for my benefit rather than anyone else
 <details>
 <summary> Jetson <-> Pi connection </summary>
+
 Setup a local wired connection between the jetson and pi
 
 On jetson:
@@ -55,6 +56,7 @@ sudo nmcli connection up jetson-pi
 
 <details>
 <summary> Realsense udev rules </summary>
+  
 ```
 wget https://raw.githubusercontent.com/IntelRealSense/librealsense/master/config/99-realsense-libusb.rules
 sudo mv 99-realsense-libusb.rules /etc/udev/rules.d/
@@ -64,6 +66,7 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 
 <details>
 <summary> Prevent lidar auto-spin </summary>
+
 By default the RPLidar A1 begins spinning as soon as it is connected via USB. To prevent excessive wear, this service holds the RTS low to prevent this, but the ROS2 node is still able to take ownership of the port when launched.
 
 Add udev rule to symlink the device to `/dev/rplidar`:
@@ -130,6 +133,7 @@ sudo systemctl reset-failed
 
 <details>
 <summary> Building Docker container</summary>
+
 Rtabmap takes a lot of RAM to build, and is more likely to be successful if additional swap memory is added, and is built via the Docker CLI rather than the devcontainer.
 ```
 sudo fallocate -l 16G /swapfile
