@@ -38,8 +38,8 @@ def generate_launch_description():
         ),
         ComposableNode(
             package='kiwi_perception',
-            plugin='kiwi_perception::GraspPlanner',
-            name='grasp_planner',
+            plugin='kiwi_perception::GraspProposal',
+            name='grasp_proposal',
             remappings=[
                 ('/pointcloud', '/camera/realsense/depth/color/points'),
             ],

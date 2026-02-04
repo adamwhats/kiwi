@@ -8,6 +8,7 @@ endif()
 ## DEPENDENCIES
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   ament_cmake
+  geometry_msgs
   pcl_conversions
   pcl_ros
   rclcpp
@@ -24,14 +25,14 @@ endforeach()
 find_package(PCL REQUIRED)
 
 ## BUILD
-add_library(grasp_planner SHARED src/grasp_planner.cpp)
-target_include_directories(grasp_planner PUBLIC ${PCL_INCLUDE_DIRS})
-target_link_libraries(grasp_planner ${PCL_LIBRARIES})
-ament_target_dependencies(grasp_planner ${THIS_PACKAGE_INCLUDE_DEPENDS})
-rclcpp_components_register_node(grasp_planner PLUGIN "kiwi_perception::GraspPlanner" EXECUTABLE "grasp_planner_node")
+add_library(grasp_proposal SHARED src/grasp_proposal.cpp)
+target_include_directories(grasp_proposal PUBLIC ${PCL_INCLUDE_DIRS})
+target_link_libraries(grasp_proposal ${PCL_LIBRARIES})
+ament_target_dependencies(grasp_proposal ${THIS_PACKAGE_INCLUDE_DEPENDS})
+rclcpp_components_register_node(grasp_proposal PLUGIN "kiwi_perception::GraspProposal" EXECUTABLE "grasp_proposal_node")
 
 ## INSTALL
-install(TARGETS grasp_planner
+install(TARGETS grasp_proposal
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
