@@ -565,7 +565,7 @@ private:
         arrow.header.stamp = stamp;
         arrow.ns = "grasp_approach";
         arrow.id = cluster.cluster_id;
-        arrow.type = visualization_msgs::msg::Marker::POSE;
+        arrow.type = visualization_msgs::msg::Marker::ARROW;
         arrow.action = visualization_msgs::msg::Marker::ADD;
         arrow.points.resize(2);
         arrow.points[0].x = cluster.obb_position.x() - 0.08f * approach.x();
