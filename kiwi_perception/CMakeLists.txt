@@ -8,28 +8,30 @@ endif()
 ## DEPENDENCIES
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   ament_cmake
-  geometry_msgs
-  isaac_ros_apriltag_interfaces
+  pcl_conversions
+  pcl_ros
   rclcpp
-  rclcpp_action
   rclcpp_components
-  std_msgs
-  tf2
+  sensor_msgs
   tf2_ros
-  kiwi_interfaces
+  visualization_msgs
 )
 
 foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
   find_package(${Dependency} REQUIRED)
 endforeach()
 
+find_package(PCL REQUIRED)
+
 ## BUILD
-add_library(AprilTagManager SHARED src/apriltag_manager.cpp)
-ament_target_dependencies(AprilTagManager ${THIS_PACKAGE_INCLUDE_DEPENDS})
-rclcpp_components_register_node(AprilTagManager PLUGIN "kiwi_perception::AprilTagManager" EXECUTABLE "apriltag_manager")
+add_library(grasp_planner SHARED src/grasp_planner.cpp)
+target_include_directories(grasp_planner PUBLIC ${PCL_INCLUDE_DIRS})
+target_link_libraries(grasp_planner ${PCL_LIBRARIES})
+ament_target_dependencies(grasp_planner ${THIS_PACKAGE_INCLUDE_DEPENDS})
+rclcpp_components_register_node(grasp_planner PLUGIN "kiwi_perception::GraspPlanner" EXECUTABLE "grasp_planner_node")
 
 ## INSTALL
-install(TARGETS AprilTagManager
+install(TARGETS grasp_planner
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
