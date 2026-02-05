@@ -10,13 +10,15 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>geometry_msgs</depend>
-  <depend>rclcpp_action</depend>
+  <depend>libpcl-all-dev</depend>
+  <depend>pcl_conversions</depend>
+  <depend>pcl_ros</depend>
   <depend>rclcpp_components</depend>
   <depend>rclcpp</depend>
-  <depend>std_msgs</depend>
+  <depend>realsense2_camera</depend>
+  <depend>sensor_msgs</depend>
   <depend>tf2_ros</depend>
-  <depend>tf2</depend>
-  <depend>kiwi_interfaces</depend>
+  <depend>visualization_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

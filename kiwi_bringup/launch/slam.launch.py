@@ -124,7 +124,9 @@ def generate_launch_description():
 
             # Saved map path
             'database_path': '',
+
         }],
+        arguments=['--ros-args', '--log-level', 'warn'],
         remappings=[
             ('depth/image', '/camera/realsense/aligned_depth_to_color/image_raw'),
             ('odom', '/odometry/filtered'),

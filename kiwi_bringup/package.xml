@@ -15,8 +15,9 @@
   <depend>moveit-msgs</depend>
   <depend>kiwi_behavior</depend>
   <depend>kiwi_description</depend>
+  <depend>kiwi_perception</depend>
   <!-- <depend>kiwi_interfaces</depend> -->
-  <!-- <depend>kiwi_perception</depend> -->
+  
   
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
