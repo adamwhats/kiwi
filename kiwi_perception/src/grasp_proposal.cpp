@@ -107,8 +107,7 @@ public:
     cluster_marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>("~/cluster_markers", 10);
     grasp_proposals_pub_ = this->create_publisher<geometry_msgs::msg::PoseArray>("~/proposals", 10);
 
-    RCLCPP_INFO(this->get_logger(), "GraspProposal initialized with clip_distance=%.2f, ground_height=%.2f, voxel=%.3f",
-                clip_distance_, ground_height_, voxel_leaf_size_);
+    RCLCPP_INFO(this->get_logger(), "GraspProposal initialized");
   }
 
 private:
@@ -157,14 +156,11 @@ private:
     }
     frame_counter_ = 0;
 
-    auto t_total_start = std::chrono::high_resolution_clock::now();
+    auto t_start = std::chrono::high_resolution_clock::now();
 
     // Convert ROS PointCloud2 to PCL
-    auto t0 = std::chrono::high_resolution_clock::now();
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*msg, *cloud);
-    auto t1 = std::chrono::high_resolution_clock::now();
-    double convert_ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
 
     size_t input_points = cloud->size();
 
@@ -175,21 +171,15 @@ private:
     pass_z.setFilterFieldName("z");
     pass_z.setFilterLimits(0.0, clip_distance_);
     pass_z.filter(*cloud_clipped);
-    auto t2 = std::chrono::high_resolution_clock::now();
-    double clip_ms = std::chrono::duration<double, std::milli>(t2 - t1).count();
 
     // Voxel downsample
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_downsampled = cloud_clipped;
-    double voxel_ms = 0.0;
     if (voxel_leaf_size_ > 0.0) {
       cloud_downsampled.reset(new pcl::PointCloud<pcl::PointXYZ>);
       pcl::VoxelGrid<pcl::PointXYZ> voxel;
       voxel.setInputCloud(cloud_clipped);
       voxel.setLeafSize(voxel_leaf_size_, voxel_leaf_size_, voxel_leaf_size_);
       voxel.filter(*cloud_downsampled);
-      auto t2b = std::chrono::high_resolution_clock::now();
-      voxel_ms = std::chrono::duration<double, std::milli>(t2b - t2).count();
-      t2 = t2b;
     }
 
     size_t after_voxel = cloud_downsampled->size();
@@ -205,8 +195,6 @@ private:
                            "Could not transform pointcloud to %s", base_frame_.c_str());
       return;
     }
-    auto t3 = std::chrono::high_resolution_clock::now();
-    double transform_ms = std::chrono::duration<double, std::milli>(t3 - t2).count();
 
     // Convert back to PCL
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_base(new pcl::PointCloud<pcl::PointXYZ>);
@@ -219,8 +207,7 @@ private:
     pass_ground.setFilterFieldName("z");
     pass_ground.setFilterLimits(ground_height_, std::numeric_limits<float>::max());
     pass_ground.filter(*cloud_no_ground);
-    auto t4 = std::chrono::high_resolution_clock::now();
-    double ground_ms = std::chrono::duration<double, std::milli>(t4 - t3).count();
+    auto t_preprocess = std::chrono::high_resolution_clock::now();
 
     size_t after_ground = cloud_no_ground->size();
 
@@ -232,18 +219,18 @@ private:
     processed_cloud_pub_->publish(output_msg);
 
     // Clustering and OBB
-    double kdtree_ms, cluster_ms, obb_ms;
-    auto clusters = extractAndProcessClusters(cloud_no_ground, kdtree_ms, cluster_ms, obb_ms);
+    auto clusters = extractAndProcessClusters(cloud_no_ground);
+    auto t_cluster = std::chrono::high_resolution_clock::now();
+    double preprocess_ms = std::chrono::duration<double, std::milli>(t_preprocess - t_start).count();
+    double cluster_ms = std::chrono::duration<double, std::milli>(t_cluster - t_preprocess).count();
 
     if (clusters.empty()) {
       auto empty_markers = createClusterMarkers({}, msg->header.stamp);
       cluster_marker_pub_->publish(empty_markers);
 
-      auto t_total_end = std::chrono::high_resolution_clock::now();
-      double total_ms = std::chrono::duration<double, std::milli>(t_total_end - t_total_start).count();
       RCLCPP_DEBUG_THROTTLE(this->get_logger(), *this->get_clock(), 5000,
-        "TIMING: total=%.1fms | pts: %zu->%zu->%zu | convert=%.1f clip=%.1f voxel=%.1f xform=%.1f ground=%.1f | NO CLUSTERS",
-        total_ms, input_points, after_voxel, after_ground, convert_ms, clip_ms, voxel_ms, transform_ms, ground_ms);
+        "TIMING: %.1fms (preprocess=%.1f cluster=%.1f) | pts: %zu->%zu->%zu | NO CLUSTERS",
+        preprocess_ms + cluster_ms, preprocess_ms, cluster_ms, input_points, after_voxel, after_ground);
       return;
     }
 
@@ -262,30 +249,23 @@ private:
     auto markers = createClusterMarkers(clusters, msg->header.stamp);
     cluster_marker_pub_->publish(markers);
 
-    auto t_total_end = std::chrono::high_resolution_clock::now();
-    double total_ms = std::chrono::duration<double, std::milli>(t_total_end - t_total_start).count();
+    auto t_end = std::chrono::high_resolution_clock::now();
+    double total_ms = std::chrono::duration<double, std::milli>(t_end - t_start).count();
     RCLCPP_DEBUG_THROTTLE(this->get_logger(), *this->get_clock(), 5000,
-      "TIMING: total=%.1fms | pts: %zu->%zu->%zu | convert=%.1f clip=%.1f voxel=%.1f xform=%.1f ground=%.1f kdtree=%.1f cluster=%.1f obb=%.1f | %zu clusters, %zu graspable",
-      total_ms, input_points, after_voxel, after_ground, convert_ms, clip_ms, voxel_ms, transform_ms, ground_ms, kdtree_ms, cluster_ms, obb_ms, clusters.size(), proposals.poses.size());
+      "TIMING: %.1fms (preprocess=%.1f cluster=%.1f) | pts: %zu->%zu->%zu | %zu clusters, %zu graspable",
+      total_ms, preprocess_ms, cluster_ms, input_points, after_voxel, after_ground, clusters.size(), proposals.poses.size());
   }
 
-  std::vector<ClusterInfo> extractAndProcessClusters(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
-                                                      double& kdtree_ms, double& cluster_ms, double& obb_ms)
+  std::vector<ClusterInfo> extractAndProcessClusters(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
   {
     std::vector<ClusterInfo> clusters;
-    kdtree_ms = cluster_ms = obb_ms = 0.0;
 
     if (cloud->empty()) {
       return clusters;
     }
 
-    auto t0 = std::chrono::high_resolution_clock::now();
-
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
     tree->setInputCloud(cloud);
-
-    auto t1 = std::chrono::high_resolution_clock::now();
-    kdtree_ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
 
     std::vector<pcl::PointIndices> cluster_indices;
     pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
@@ -296,19 +276,10 @@ private:
     ec.setInputCloud(cloud);
     ec.extract(cluster_indices);
 
-    auto t2 = std::chrono::high_resolution_clock::now();
-    cluster_ms = std::chrono::duration<double, std::milli>(t2 - t1).count();
-
     clusters.reserve(cluster_indices.size());
 
     int cluster_id = 0;
     for (const auto& indices : cluster_indices) {
-      if (indices.indices.size() < 3) {
-        continue;
-      }
-
-      auto t_obb_start = std::chrono::high_resolution_clock::now();
-
       // Accumulate XY stats and z bounds in a single pass
       float min_z = std::numeric_limits<float>::max();
       float max_z = std::numeric_limits<float>::lowest();
@@ -397,9 +368,6 @@ private:
 
       // Smallest horizontal dimension (what the gripper must straddle)
       info.min_dimension = std::min(extent1, extent2);
-
-      auto t_obb_end = std::chrono::high_resolution_clock::now();
-      obb_ms += std::chrono::duration<double, std::milli>(t_obb_end - t_obb_start).count();
 
       clusters.push_back(info);
     }
