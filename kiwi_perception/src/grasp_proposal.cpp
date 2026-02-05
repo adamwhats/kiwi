@@ -40,12 +40,12 @@ public:
   {
     // Pointcloud filter parameters
     this->declare_parameter("clip_distance", 0.5);
-    this->declare_parameter("ground_height", 0.01);
+    this->declare_parameter("ground_height", 0.005);
     this->declare_parameter("base_frame", "base_link");
 
     // Clustering parameters
     this->declare_parameter("cluster_tolerance", 0.02);
-    this->declare_parameter("min_cluster_size", 100);
+    this->declare_parameter("min_cluster_size", 50);
     this->declare_parameter("max_cluster_size", 800);
 
     // Graspability filter parameters
@@ -60,10 +60,10 @@ public:
     this->declare_parameter("arm_base_y", 0.076);
 
     // Performance parameters
-    this->declare_parameter("process_every_n_frames", 1);
+    this->declare_parameter("process_every_n_frames", 3);
     this->declare_parameter("voxel_leaf_size", 0.005);
 
-    // Log level for composable nodes (--ros-args --log-level doesn't propagate)
+    // Log level
     this->declare_parameter("log_level", "info");
     auto log_level = this->get_parameter("log_level").as_string();
     int severity = RCUTILS_LOG_SEVERITY_INFO;
@@ -105,7 +105,7 @@ public:
     // Publishers
     processed_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("~/processed_points", 10);
     cluster_marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>("~/cluster_markers", 10);
-    grasp_proposals_pub_ = this->create_publisher<geometry_msgs::msg::PoseArray>("~/grasp_proposals", 10);
+    grasp_proposals_pub_ = this->create_publisher<geometry_msgs::msg::PoseArray>("~/proposals", 10);
 
     RCLCPP_INFO(this->get_logger(), "GraspProposal initialized with clip_distance=%.2f, ground_height=%.2f, voxel=%.3f",
                 clip_distance_, ground_height_, voxel_leaf_size_);
@@ -505,7 +505,7 @@ private:
       const rclcpp::Time& stamp)
   {
     visualization_msgs::msg::MarkerArray marker_array;
-    marker_array.markers.reserve(clusters.size() * 2 + 1);
+    marker_array.markers.reserve(clusters.size() + 1);
 
     visualization_msgs::msg::Marker delete_marker;
     delete_marker.header.frame_id = base_frame_;
@@ -550,40 +550,6 @@ private:
 
       marker.lifetime = rclcpp::Duration::from_seconds(0.5);
       marker_array.markers.push_back(marker);
-
-      // Arrow marker for each graspable cluster's approach direction
-      if (cluster.is_graspable) {
-        auto grasp_pose = computeGraspPose(cluster);
-
-        // Extract approach direction from the grasp pose Z axis
-        Eigen::Quaternionf q(grasp_pose.orientation.w, grasp_pose.orientation.x,
-                             grasp_pose.orientation.y, grasp_pose.orientation.z);
-        Eigen::Vector3f approach = q * Eigen::Vector3f::UnitZ();
-
-        visualization_msgs::msg::Marker arrow;
-        arrow.header.frame_id = base_frame_;
-        arrow.header.stamp = stamp;
-        arrow.ns = "grasp_approach";
-        arrow.id = cluster.cluster_id;
-        arrow.type = visualization_msgs::msg::Marker::ARROW;
-        arrow.action = visualization_msgs::msg::Marker::ADD;
-        arrow.points.resize(2);
-        arrow.points[0].x = cluster.obb_position.x() - 0.08f * approach.x();
-        arrow.points[0].y = cluster.obb_position.y() - 0.08f * approach.y();
-        arrow.points[0].z = cluster.obb_position.z();
-        arrow.points[1].x = cluster.obb_position.x();
-        arrow.points[1].y = cluster.obb_position.y();
-        arrow.points[1].z = cluster.obb_position.z();
-        arrow.scale.x = 0.008; // shaft diameter
-        arrow.scale.y = 0.015; // head diameter
-        arrow.scale.z = 0.02;  // head length
-        arrow.color.r = 0.0;
-        arrow.color.g = 0.5;
-        arrow.color.b = 1.0;
-        arrow.color.a = 1.0;
-        arrow.lifetime = rclcpp::Duration::from_seconds(0.5);
-        marker_array.markers.push_back(arrow);
-      }
     }
 
     return marker_array;
