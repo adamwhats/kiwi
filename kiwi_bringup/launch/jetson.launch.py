@@ -1,8 +1,7 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDescription
-from launch.conditions import IfCondition
+from launch.actions import GroupAction, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import PathJoinSubstitution
 from launch_ros.actions import PushRosNamespace
 from launch_ros.substitutions import FindPackageShare
 from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
@@ -34,15 +33,9 @@ def generate_launch_description():
     )
 
     # Navigation
-    use_nav2 = LaunchConfiguration('navigation', default=False)
-    nav2_bringup = IncludeLaunchDescription(
+    nav2_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            launch_file_path=PathJoinSubstitution([FindPackageShare('nav2_bringup'), 'launch', 'bringup_launch.py'])),
-        launch_arguments={
-            'params_files': PathJoinSubstitution([FindPackageShare('kiwi_bringup'), 'config', 'nav2_params.yaml']),
-            'map': 'False'
-        }.items(),
-        condition=IfCondition(use_nav2)
+            launch_file_path=PathJoinSubstitution([FindPackageShare('kiwi_bringup'), 'launch', 'navigation.launch.py'])),
     )
 
     # Foxglove bridge
@@ -59,5 +52,6 @@ def generate_launch_description():
         lidar_with_ns,
         slam_launch,
         perception_launch,
+        nav2_launch,
         foxglove_bridge,
     ])

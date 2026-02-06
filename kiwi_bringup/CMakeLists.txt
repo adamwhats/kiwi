@@ -27,6 +27,7 @@ ament_python_install_package(${PROJECT_NAME})
 install(PROGRAMS
   kiwi_bringup/remote_launch_terminator.py
   kiwi_bringup/odom_covariance_override.py
+  kiwi_bringup/twist_stamper.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
