@@ -40,7 +40,7 @@ public:
   {
     // Pointcloud filter parameters
     this->declare_parameter("clip_distance", 0.5);
-    this->declare_parameter("ground_height", 0.005);
+    this->declare_parameter("ground_height", 0.01);
     this->declare_parameter("base_frame", "base_link");
 
     // Clustering parameters

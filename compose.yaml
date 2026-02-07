@@ -21,23 +21,6 @@ services:
     stdin_open: true
     tty: true
 
-  nav2:
-    image: ros:humble-navigation
-    env_file: .env
-    volumes:
-      - ~/workspaces/kiwi_ws/src/kiwi/kiwi_bringup/config/nav2_params.yaml:/nav2_params.yaml:ro
-    network_mode: host
-    shm_size: 512mb
-    command: >
-      bash -c "source /opt/ros/humble/setup.bash &&
-               ros2 launch nav2_bringup navigation_launch.py
-               params_file:=/nav2_params.yaml"
-    restart: unless-stopped
-    stdin_open: true
-    tty: true
-    depends_on:
-      - jetson
-
   pi:
     build:
       context: ~/kiwi_ws
