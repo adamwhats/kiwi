@@ -2,9 +2,8 @@ from launch import LaunchDescription
 from launch.actions import GroupAction, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import PathJoinSubstitution
-from launch_ros.actions import PushRosNamespace
+from launch_ros.actions import Node, PushRosNamespace
 from launch_ros.substitutions import FindPackageShare
-from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
 
 
 def generate_launch_description():
@@ -12,7 +11,10 @@ def generate_launch_description():
     # Lidar
     lidar_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            launch_file_path=PathJoinSubstitution([FindPackageShare('rplidar_ros2_driver'), 'launch', 'rplidar.launch.py'])),
+            launch_file_path=PathJoinSubstitution(
+                [FindPackageShare('rplidar_ros2_driver'), 'launch', 'rplidar.launch.py']
+            )
+        ),
         launch_arguments={
             'params_file': PathJoinSubstitution([FindPackageShare('kiwi_bringup'), 'config', 'lidar.yaml'])
         }.items(),
@@ -23,35 +25,44 @@ def generate_launch_description():
     # Slam
     slam_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            launch_file_path=PathJoinSubstitution([FindPackageShare('kiwi_bringup'), 'launch', 'slam.launch.py'])),
+            launch_file_path=PathJoinSubstitution([FindPackageShare('kiwi_bringup'), 'launch', 'slam.launch.py'])
+        ),
     )
 
     # Perception
     perception_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            launch_file_path=PathJoinSubstitution([FindPackageShare('kiwi_perception'), 'launch', 'perception.launch.py'])),
+            launch_file_path=PathJoinSubstitution(
+                [FindPackageShare('kiwi_perception'), 'launch', 'perception.launch.py']
+            )
+        ),
     )
 
     # Navigation
     nav2_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            launch_file_path=PathJoinSubstitution([FindPackageShare('kiwi_bringup'), 'launch', 'navigation.launch.py'])),
+            launch_file_path=PathJoinSubstitution([FindPackageShare('kiwi_bringup'), 'launch', 'navigation.launch.py'])
+        ),
     )
 
     # Foxglove bridge
-    foxglove_bridge = IncludeLaunchDescription(
-        XMLLaunchDescriptionSource([
-            PathJoinSubstitution([FindPackageShare('foxglove_bridge'), 'launch', 'foxglove_bridge_launch.xml'])
-        ]),
-        launch_arguments={
-            'capabilities': '[clientPublish,parameters,parametersSubscribe,connectionGraph,assets]',  # Removed services
-        }.items()
+    foxglove_bridge = Node(
+        package='foxglove_bridge',
+        executable='foxglove_bridge',
+        parameters=[
+            {
+                'capabilities': ['clientPublish', 'parameters', 'parametersSubscribe', 'connectionGraph', 'assets'],
+            }
+        ],
+        ros_arguments=['--log-level', 'warn'],
     )
 
-    return LaunchDescription([
-        lidar_with_ns,
-        slam_launch,
-        perception_launch,
-        nav2_launch,
-        foxglove_bridge,
-    ])
+    return LaunchDescription(
+        [
+            lidar_with_ns,
+            slam_launch,
+            perception_launch,
+            nav2_launch,
+            foxglove_bridge,
+        ]
+    )
