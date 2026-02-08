@@ -45,6 +45,13 @@ def generate_launch_description():
         ),
     )
 
+    # Behaviour
+    behaviour_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            launch_file_path=PathJoinSubstitution([FindPackageShare('kiwi_behaviour'), 'launch', 'behaviour.launch.py'])
+        ),
+    )
+
     # Foxglove bridge
     foxglove_bridge = Node(
         package='foxglove_bridge',
@@ -63,6 +70,7 @@ def generate_launch_description():
             slam_launch,
             perception_launch,
             nav2_launch,
+            behaviour_launch,
             foxglove_bridge,
         ]
     )

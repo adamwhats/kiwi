@@ -16,6 +16,7 @@
 #include "sensor_msgs/msg/point_cloud2.hpp"
 #include "geometry_msgs/msg/pose_array.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
+#include "tf2/exceptions.h"
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
 
@@ -190,9 +191,15 @@ private:
     cloud_clipped_msg.header = msg->header;
 
     sensor_msgs::msg::PointCloud2 cloud_transformed;
-    if (!pcl_ros::transformPointCloud(base_frame_, cloud_clipped_msg, cloud_transformed, *tf_buffer_)) {
+    try {
+      if (!pcl_ros::transformPointCloud(base_frame_, cloud_clipped_msg, cloud_transformed, *tf_buffer_)) {
+        RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 5000,
+                             "Could not transform pointcloud to %s", base_frame_.c_str());
+        return;
+      }
+    } catch (const tf2::TransformException& ex) {
       RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 5000,
-                           "Could not transform pointcloud to %s", base_frame_.c_str());
+                           "TF error transforming to %s: %s", base_frame_.c_str(), ex.what());
       return;
     }
 

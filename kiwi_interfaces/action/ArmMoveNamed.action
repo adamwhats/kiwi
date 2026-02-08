@@ -1,0 +1,8 @@
+# Move a planning group to a named SRDF target via MoveIt
+string group_name
+string target_name
+---
+bool success
+string message
+---
+string status

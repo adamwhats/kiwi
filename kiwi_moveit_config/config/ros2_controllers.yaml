@@ -26,11 +26,9 @@ base_controller:
     joints:
       - virtual_joint
     command_interfaces:
-      - position
-      - velocity
+      []
     state_interfaces:
-      - position
-      - velocity
+      []
 arm_controller:
   ros__parameters:
     joints:
@@ -38,8 +36,6 @@ arm_controller:
       - link2_joint
       - link3_joint
     command_interfaces:
-      - position
-      - velocity
+      []
     state_interfaces:
-      - position
-      - velocity
+      []

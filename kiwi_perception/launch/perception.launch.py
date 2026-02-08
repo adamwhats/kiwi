@@ -14,27 +14,30 @@ def generate_launch_description():
             package='realsense2_camera',
             plugin='realsense2_camera::RealSenseNodeFactory',
             name='realsense',
-            parameters=[{
-                'camera_name': 'camera',
-                'base_frame_id': 'link',
-                'serial_no': '_008222072206',
-                'depth_module.depth_profile': '640x480x15',
-                'rgb_camera.color_profile': '640x480x15',
-                'enable_infra1': False,
-                'enable_infra2': False,
-                'enable_depth': True,
-                'enable_gyro': True,
-                'enable_accel': True,
-                'gyro_fps': 200,
-                'accel_fps': 63,
-                'unite_imu_method': 2,
-                'align_depth.enable': True,
-                'pointcloud__neon_.enable': True,
-                'decimation_filter.enable': True,
-                'decimation_filter.filter_magnitude': 2,
-                'publish_tf': True,
-                '_image_transport': 'compressed',
-            }],
+            parameters=[
+                {
+                    'camera_name': 'camera',
+                    'base_frame_id': 'link',
+                    'serial_no': '_008222072206',
+                    'depth_module.depth_profile': '640x480x15',
+                    'rgb_camera.color_profile': '640x480x15',
+                    'enable_infra1': False,
+                    'enable_infra2': False,
+                    'enable_depth': True,
+                    'enable_gyro': True,
+                    'enable_accel': True,
+                    'gyro_fps': 200,
+                    'accel_fps': 63,
+                    'unite_imu_method': 2,
+                    'align_depth.enable': True,
+                    'pointcloud__neon_.enable': True,
+                    'decimation_filter.enable': True,
+                    'decimation_filter.filter_magnitude': 2,
+                    'publish_tf': True,
+                    '_image_transport': 'compressed',
+                    'initial_reset': True,
+                }
+            ],
         ),
         ComposableNode(
             package='kiwi_perception',
@@ -43,9 +46,7 @@ def generate_launch_description():
             remappings=[
                 ('/pointcloud', '/camera/realsense/depth/color/points'),
             ],
-            parameters=[{
-                'log_level': 'info'
-            }],
+            parameters=[{'log_level': 'info'}],
             extra_arguments=[{'use_intra_process_comms': True}],
         ),
     ]
@@ -59,6 +60,8 @@ def generate_launch_description():
         output='both',
     )
 
-    return LaunchDescription([
-        pointcloud_container,
-    ])
+    return LaunchDescription(
+        [
+            pointcloud_container,
+        ]
+    )

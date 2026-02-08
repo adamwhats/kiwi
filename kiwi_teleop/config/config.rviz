@@ -84,9 +84,9 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        VIO_camera_bottom_screw_frame:
+        camera_bottom_screw_frame:
           Value: true
-        VIO_camera_link:
+        camera_link:
           Value: true
         arm_camera_bottom_screw_frame:
           Value: true
@@ -140,8 +140,8 @@ Visualization Manager:
       Tree:
         map:
           base_link:
-            VIO_camera_bottom_screw_frame:
-              VIO_camera_link:
+            camera_bottom_screw_frame:
+              camera_link:
                 {}
             arm_camera_bottom_screw_frame:
               arm_camera_link:
@@ -248,11 +248,11 @@ Visualization Manager:
           Expand Link Details: false
           Expand Tree: false
           Link Tree Style: Links in Alphabetic Order
-          VIO_camera_bottom_screw_frame:
+          camera_bottom_screw_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          VIO_camera_link:
+          camera_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -380,11 +380,11 @@ Visualization Manager:
           Expand Link Details: false
           Expand Tree: false
           Link Tree Style: Links in Alphabetic Order
-          VIO_camera_bottom_screw_frame:
+          camera_bottom_screw_frame:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          VIO_camera_link:
+          camera_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false

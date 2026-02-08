@@ -10,14 +10,18 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>behaviortree_cpp_v3</depend>
+  <depend>control_msgs</depend>
   <depend>geometry_msgs</depend>
+  <depend>kiwi_interfaces</depend>
   <depend>moveit_msgs</depend>
+  <depend>moveit_ros_planning_interface</depend>
   <depend>nav2_behavior_tree</depend>
   <depend>nav2_msgs</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_action</depend>
   <depend>rclcpp_components</depend>
-  <depend>kiwi_interfaces</depend>
+
+  <exec_depend>rclpy</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

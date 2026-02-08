@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 project(kiwi_moveit_config)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(ament_cmake REQUIRED)
 
