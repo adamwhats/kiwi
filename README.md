@@ -55,6 +55,21 @@ sudo nmcli connection up jetson-pi
 </details>
 
 <details>
+<summary> Dynamixel USB latency timer </summary>
+
+Set the FTDI latency timer to 1ms for reliable comms at 1Mbps baud:
+```
+sudo tee /etc/udev/rules.d/99-dynamixel.rules << 'EOF'
+# Set FTDI latency timer to 1ms for Dynamixel bus
+ACTION=="add|change", SUBSYSTEM=="usb-serial", DRIVER=="ftdi_sio", ATTR{latency_timer}="1"
+EOF
+
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+```
+</details>
+
+<details>
 <summary> Realsense udev rules </summary>
   
 ```

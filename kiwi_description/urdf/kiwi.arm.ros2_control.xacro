@@ -9,7 +9,7 @@
       <hardware>
         <plugin>dynamixel_hardware_interface/DynamixelHardware</plugin>
         <param name="port_name">/dev/ttyUSB0</param>
-        <param name="baud_rate">57600</param>
+        <param name="baud_rate">1000000</param>
         <param name="error_timeout_ms">10000</param>
         <param name="dynamixel_model_folder">/param/dxl_model</param>
         <param name="number_of_joints">4</param>

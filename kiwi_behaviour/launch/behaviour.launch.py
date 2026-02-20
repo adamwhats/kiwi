@@ -12,6 +12,12 @@ def generate_launch_description():
         package='kiwi_behaviour',
         executable='arm_move_named_server',
         output='screen',
+        parameters=[
+            {
+                'max_velocity_scaling': 0.5,
+                'max_acceleration_scaling': 0.3,
+            }
+        ],
     )
 
     task_executor = Node(

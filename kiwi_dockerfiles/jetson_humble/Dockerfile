@@ -50,8 +50,9 @@ RUN apt-get update && \
     ros-${ROS_DISTRO}-dynamixel-interfaces \
     ros-${ROS_DISTRO}-foxglove-bridge \
     ros-${ROS_DISTRO}-moveit-msgs \
-    ros-${ROS_DISTRO}-navigation2 \
+    ros-${ROS_DISTRO}-moveit-ros-planning-interface \
     ros-${ROS_DISTRO}-nav2-bringup \
+    ros-${ROS_DISTRO}-navigation2 \
     ros-${ROS_DISTRO}-robot-localization \
     ros-${ROS_DISTRO}-rtabmap-slam \
     rsync && \

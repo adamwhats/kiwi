@@ -15,6 +15,9 @@ class ArmMoveNamedServer : public rclcpp::Node {
 
   explicit ArmMoveNamedServer(const rclcpp::NodeOptions& options = rclcpp::NodeOptions())
       : Node("arm_move_named_server", options) {
+    declare_parameter<double>("max_velocity_scaling", 0.2);
+    declare_parameter<double>("max_acceleration_scaling", 0.2);
+
     action_server_ = rclcpp_action::create_server<ArmMoveNamed>(
         this, "~/cmd", std::bind(&ArmMoveNamedServer::handle_goal, this, _1, _2),
         std::bind(&ArmMoveNamedServer::handle_cancel, this, _1),
@@ -56,6 +59,8 @@ class ArmMoveNamedServer : public rclcpp::Node {
     goal_handle->publish_feedback(feedback);
 
     moveit::planning_interface::MoveGroupInterface move_group(shared_from_this(), goal->group_name);
+    move_group.setMaxVelocityScalingFactor(get_parameter("max_velocity_scaling").as_double());
+    move_group.setMaxAccelerationScalingFactor(get_parameter("max_acceleration_scaling").as_double());
 
     if (!move_group.setNamedTarget(goal->target_name)) {
       result->success = false;

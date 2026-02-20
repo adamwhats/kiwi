@@ -2,6 +2,7 @@
 """Run arm home + gripper open/close on startup, then exit."""
 
 import time
+
 import rclpy
 from control_msgs.action import GripperCommand
 from kiwi_interfaces.action import ArmMoveNamed
@@ -15,8 +16,8 @@ class StartupSequence(Node):
 
         self.declare_parameter('arm_action', '/arm_move_named_server/cmd')
         self.declare_parameter('gripper_action', '/gripper_controller/gripper_cmd')
-        self.declare_parameter('gripper_open_position', 0.025)
-        self.declare_parameter('gripper_close_position', 0.005)
+        self.declare_parameter('gripper_open_position', 0.023)
+        self.declare_parameter('gripper_close_position', 0.0)
         self.declare_parameter('gripper_settle_time', 0.5)
 
         arm_topic = self.get_parameter('arm_action').value
@@ -32,7 +33,7 @@ class StartupSequence(Node):
 
     def run(self):
         # Move arm to home
-        if not self._send_arm_goal('combined', 'home'):
+        if not self._send_arm_goal('arm', 'home'):
             return False
 
         # Open gripper
@@ -46,7 +47,7 @@ class StartupSequence(Node):
             return False
 
         # Move arm to ready
-        if not self._send_arm_goal('combined', 'ready'):
+        if not self._send_arm_goal('arm', 'ready'):
             return False
 
         # Open gripper
@@ -60,7 +61,7 @@ class StartupSequence(Node):
             return False
 
         # Move arm to home
-        if not self._send_arm_goal('combined', 'home'):
+        if not self._send_arm_goal('arm', 'home'):
             return False
 
         self.get_logger().info('Startup sequence complete')
