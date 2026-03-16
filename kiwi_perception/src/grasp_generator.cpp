@@ -117,6 +117,8 @@ struct GraspCandidate {
   double tcp_yaw;  // OBB long-axis yaw (used for finger orientation)
   double arm_base_x_world, arm_base_y_world;
   int costmap_cost;
+  geometry_msgs::msg::PoseStamped obb_pose_map;
+  geometry_msgs::msg::Vector3 obb_scale;
 };
 
 class GraspGenerator : public rclcpp::Node {
@@ -169,6 +171,8 @@ class GraspGenerator : public rclcpp::Node {
         [](std::shared_ptr<GoalHandle>) { return rclcpp_action::CancelResponse::ACCEPT; },
         [this](std::shared_ptr<GoalHandle> gh) { execute(gh); });
 
+    grasp_viz_pub_ = create_publisher<visualization_msgs::msg::MarkerArray>("~/selected", 10);
+
     RCLCPP_INFO(get_logger(), "GraspGenerator ready");
   }
 
@@ -208,12 +212,15 @@ class GraspGenerator : public rclcpp::Node {
     }
 
     std::vector<GraspCandidate> candidates;
+    int n_graspable = 0;
 
     for (const auto& m : markers->markers) {
       if (m.ns != "graspable")
         continue;
       if (m.action != visualization_msgs::msg::Marker::ADD)
         continue;
+
+      ++n_graspable;
 
       // Transform OBB centroid to map frame
       geometry_msgs::msg::PoseStamped centroid_base, centroid_map;
@@ -255,10 +262,14 @@ class GraspGenerator : public rclcpp::Node {
           if (cost < 0 || cost >= lethal_)
             continue;
 
-          candidates.push_back({rx, ry, approach_yaw, ox, oy, oz, obb_yaw, arm_bx, arm_by, cost});
+          candidates.push_back(
+              {rx, ry, approach_yaw, ox, oy, oz, obb_yaw, arm_bx, arm_by, cost, centroid_map, m.scale});
         }
       }
     }
+
+    RCLCPP_INFO(get_logger(), "Grasp search: %d objects, %d positions sampled, %zu valid", n_graspable,
+                n_graspable * 2 * n_samples_, candidates.size());
 
     if (candidates.empty()) {
       result->success = false;
@@ -296,6 +307,41 @@ class GraspGenerator : public rclcpp::Node {
     result->success = true;
     result->message = "ok";
     goal_handle->succeed(result);
+    publish_grasp_marker(best);
+  }
+
+  // -------------------------------------------------------------------------
+  // Visualization
+  // -------------------------------------------------------------------------
+
+  void publish_grasp_marker(const GraspCandidate& best) {
+    visualization_msgs::msg::MarkerArray ma;
+
+    visualization_msgs::msg::Marker del;
+    del.header.frame_id = map_frame_;
+    del.ns = "selected_grasp";
+    del.action = visualization_msgs::msg::Marker::DELETEALL;
+    ma.markers.push_back(del);
+
+    visualization_msgs::msg::Marker m;
+    m.header = best.obb_pose_map.header;
+    m.header.stamp = now();
+    m.ns = "selected_grasp";
+    m.id = 0;
+    m.type = visualization_msgs::msg::Marker::CUBE;
+    m.action = visualization_msgs::msg::Marker::ADD;
+    m.pose = best.obb_pose_map.pose;
+    m.scale.x = best.obb_scale.x * 1.05;
+    m.scale.y = best.obb_scale.y * 1.05;
+    m.scale.z = best.obb_scale.z * 1.05;
+    m.color.r = 0.0;
+    m.color.g = 0.0;
+    m.color.b = 1.0;
+    m.color.a = 0.7;
+    m.lifetime = rclcpp::Duration::from_seconds(30.0);
+    ma.markers.push_back(m);
+
+    grasp_viz_pub_->publish(ma);
   }
 
   // -------------------------------------------------------------------------
@@ -331,6 +377,7 @@ class GraspGenerator : public rclcpp::Node {
   rclcpp::Subscription<visualization_msgs::msg::MarkerArray>::SharedPtr markers_sub_;
   rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr costmap_sub_;
   rclcpp_action::Server<SelectGraspTarget>::SharedPtr action_server_;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr grasp_viz_pub_;
 
   std::mutex mutex_;
   visualization_msgs::msg::MarkerArray::SharedPtr latest_markers_;
