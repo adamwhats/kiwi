@@ -11,6 +11,7 @@
 #include "bt_nodes/arm_move_named_action.hpp"
 #include "bt_nodes/gripper_command_action.hpp"
 #include "bt_nodes/navigate_to_pose_action.hpp"
+#include "bt_nodes/select_grasp_target_action.hpp"
 
 using namespace std::placeholders;
 using namespace std::chrono_literals;
@@ -68,6 +69,13 @@ private:
         return std::make_unique<NavigateToPoseAction>(name, "/navigate_to_pose", config);
       };
     factory_.registerBuilder<NavigateToPoseAction>("NavigateToPose", nav_builder);
+
+    BT::NodeBuilder grasp_builder =
+      [](const std::string & name, const BT::NodeConfiguration & config) {
+        return std::make_unique<SelectGraspTargetAction>(
+          name, "/grasp_generator/select_target", config);
+      };
+    factory_.registerBuilder<SelectGraspTargetAction>("SelectGraspTarget", grasp_builder);
   }
 
   BT::Blackboard::Ptr create_blackboard()

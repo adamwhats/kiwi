@@ -10,11 +10,16 @@ endif()
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   ament_cmake
   geometry_msgs
+  kiwi_interfaces
+  nav_msgs
   pcl_conversions
   pcl_ros
   rclcpp
+  rclcpp_action
   rclcpp_components
   sensor_msgs
+  tf2
+  tf2_geometry_msgs
   tf2_ros
   visualization_msgs
 )
@@ -26,21 +31,29 @@ endforeach()
 find_package(PCL REQUIRED)
 
 ## BUILD
-add_library(grasp_proposal SHARED src/grasp_proposal.cpp)
-target_include_directories(grasp_proposal PUBLIC ${PCL_INCLUDE_DIRS})
-target_link_libraries(grasp_proposal ${PCL_LIBRARIES})
-ament_target_dependencies(grasp_proposal ${THIS_PACKAGE_INCLUDE_DEPENDS})
-rclcpp_components_register_node(grasp_proposal PLUGIN "kiwi_perception::GraspProposal" EXECUTABLE "grasp_proposal_node")
+add_library(graspable_object_filter SHARED src/graspable_object_filter.cpp)
+target_include_directories(graspable_object_filter PUBLIC ${PCL_INCLUDE_DIRS})
+target_link_libraries(graspable_object_filter ${PCL_LIBRARIES})
+ament_target_dependencies(graspable_object_filter ${THIS_PACKAGE_INCLUDE_DEPENDS})
+rclcpp_components_register_node(graspable_object_filter
+  PLUGIN "kiwi_perception::GraspableObjectFilter"
+  EXECUTABLE "graspable_object_filter_node")
+
+add_library(grasp_generator SHARED src/grasp_generator.cpp)
+ament_target_dependencies(grasp_generator ${THIS_PACKAGE_INCLUDE_DEPENDS})
+rclcpp_components_register_node(grasp_generator
+  PLUGIN "kiwi_perception::GraspGenerator"
+  EXECUTABLE "grasp_generator_node")
 
 ## INSTALL
-install(TARGETS grasp_proposal
+install(TARGETS graspable_object_filter grasp_generator
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
 )
 
 install(DIRECTORY
-  launch 
+  launch
   DESTINATION share/${PROJECT_NAME})
 
 ament_package()

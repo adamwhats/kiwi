@@ -1,0 +1,26 @@
+<!--
+  Pick sequence: select best grasp target (returns base_pose + grasp_pose + pre_pick_pose),
+  stow arm, navigate to base_pose, deploy arm. Poses written to blackboard by SelectGraspTarget.
+-->
+<root main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <Sequence name="PickObject">
+
+      <SelectGraspTarget standoff_distance="0.08"
+                         base_pose="{base_pose}"
+                         grasp_pose="{grasp_pose}"
+                         pre_pick_pose="{pre_pick_pose}"
+                         server_name="/grasp_generator/select_target"/>
+
+      <ArmMoveNamed group_name="combined" target_name="home"
+                    server_name="/bt/arm_move_named"/>
+
+      <NavigateToPose goal="{base_pose}"
+                      server_name="/navigate_to_pose"/>
+
+      <ArmMoveNamed group_name="combined" target_name="ready"
+                    server_name="/bt/arm_move_named"/>
+
+    </Sequence>
+  </BehaviorTree>
+</root>

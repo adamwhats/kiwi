@@ -1,0 +1,9 @@
+float32 standoff_distance   # metres; TCP pre-pick offset along approach Z
+---
+bool success
+string message
+geometry_msgs/PoseStamped grasp_pose      # TCP at object centroid, base_link frame
+geometry_msgs/PoseStamped pre_pick_pose   # grasp_pose offset backward by standoff_distance
+geometry_msgs/PoseStamped base_pose       # nav2 goal for robot base, map frame
+---
+# no feedback — action completes in microseconds

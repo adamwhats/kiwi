@@ -21,6 +21,7 @@ endforeach()
 set(CUSTOM_INTERFACES
   "action/ArmMoveNamed.action"
   "action/ExecuteTask.action"
+  "action/SelectGraspTarget.action"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}

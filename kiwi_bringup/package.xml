@@ -11,8 +11,7 @@
   <buildtool_depend>ament_cmake_python</buildtool_depend>
 
   <depend>foxglove_bridge</depend>
-  <depend>realsense2_camera</depend>
-  <depend>moveit-msgs</depend>
+  <depend>moveit_msgs</depend>
   <depend>kiwi_behaviour</depend>
   <depend>kiwi_description</depend>
   <depend>kiwi_interfaces</depend>

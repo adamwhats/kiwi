@@ -44,19 +44,28 @@ RUN mkdir -p ${DEPS_DIR}/src && cd ${DEPS_DIR} && \
 
 # Install other dependencies
 RUN apt-get update && \
-    apt-mark hold *realsense* && \    
+    apt-mark hold *realsense* && \
     apt-get install -y --no-install-recommends \
+    libpcl-dev \
+    ros-${ROS_DISTRO}-behaviortree-cpp-v3 \
     ros-${ROS_DISTRO}-control-msgs \
     ros-${ROS_DISTRO}-dynamixel-interfaces \
     ros-${ROS_DISTRO}-foxglove-bridge \
+    ros-${ROS_DISTRO}-joint-state-publisher \
     ros-${ROS_DISTRO}-moveit-msgs \
     ros-${ROS_DISTRO}-moveit-ros-planning-interface \
     ros-${ROS_DISTRO}-nav2-bringup \
     ros-${ROS_DISTRO}-navigation2 \
+    ros-${ROS_DISTRO}-pcl-conversions \
+    ros-${ROS_DISTRO}-pcl-ros \
     ros-${ROS_DISTRO}-robot-localization \
+    ros-${ROS_DISTRO}-robot-state-publisher \
     ros-${ROS_DISTRO}-rtabmap-slam \
+    ros-${ROS_DISTRO}-xacro \
     rsync && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN pip install scipy
 
 # Bash helpers
 RUN echo "source ${DEPS_DIR}/install/setup.bash" >> ~/.bashrc && \

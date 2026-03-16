@@ -6,7 +6,7 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    tree_xml = os.path.join(get_package_share_directory('kiwi_behaviour'), 'trees', 'nav_to_pose_with_arm.xml')
+    tree_xml = os.path.join(get_package_share_directory('kiwi_behaviour'), 'trees', 'pick_object.xml')
 
     arm_move_named_server = Node(
         package='kiwi_behaviour',

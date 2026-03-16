@@ -41,12 +41,27 @@ def generate_launch_description():
         ),
         ComposableNode(
             package='kiwi_perception',
-            plugin='kiwi_perception::GraspProposal',
-            name='grasp_proposal',
+            plugin='kiwi_perception::GraspableObjectFilter',
+            name='graspable_object_filter',
             remappings=[
                 ('/pointcloud', '/camera/realsense/depth/color/points'),
             ],
             parameters=[{'log_level': 'info'}],
+            extra_arguments=[{'use_intra_process_comms': True}],
+        ),
+        ComposableNode(
+            package='kiwi_perception',
+            plugin='kiwi_perception::GraspGenerator',
+            name='grasp_generator',
+            remappings=[
+                ('~/cluster_markers', '/graspable_object_filter/cluster_markers'),
+            ],
+            parameters=[{
+                'arm_reach_min': 0.08,
+                'arm_reach_max': 0.30,
+                'dz_min': -0.25,
+                'dz_max': 0.10,
+            }],
             extra_arguments=[{'use_intra_process_comms': True}],
         ),
     ]

@@ -1,44 +1,40 @@
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/voxel_grid.h>
-#include <pcl/segmentation/extract_clusters.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 #include <pcl/search/kdtree.h>
+#include <pcl/segmentation/extract_clusters.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include <pcl_ros/transforms.hpp>
+#include <rcutils/logging.h>
 
 #include <Eigen/Geometry>
 #include <chrono>
 #include <cmath>
+#include <pcl_ros/transforms.hpp>
 
-#include <rcutils/logging.h>
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
-#include "geometry_msgs/msg/pose_array.hpp"
-#include "visualization_msgs/msg/marker_array.hpp"
 #include "tf2/exceptions.h"
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
+#include "visualization_msgs/msg/marker_array.hpp"
 
-namespace kiwi_perception
-{
+namespace kiwi_perception {
 
 struct ClusterInfo {
-  Eigen::Vector3f obb_position;       // center in base_link
-  Eigen::Quaternionf obb_orientation; // yaw-only rotation around Z
-  Eigen::Vector3f obb_dimensions;     // (extent_pca1, extent_pca2, vertical)
-  float yaw;                          // PCA yaw angle in base_link
-  float min_dimension;                // smallest horizontal OBB dimension
-  float vertical_extent;              // max_z - min_z
+  Eigen::Vector3f obb_position;        // center in base_link
+  Eigen::Quaternionf obb_orientation;  // yaw-only rotation around Z
+  Eigen::Vector3f obb_dimensions;      // (extent_pca1, extent_pca2, vertical)
+  float yaw;                           // PCA yaw angle in base_link
+  float min_dimension;                 // smallest horizontal OBB dimension
+  float vertical_extent;               // max_z - min_z
   bool is_graspable;
   int cluster_id;
 };
 
-class GraspProposal : public rclcpp::Node
-{
-public:
-  GraspProposal(const rclcpp::NodeOptions& options) : Node("grasp_proposal", options)
-  {
+class GraspableObjectFilter : public rclcpp::Node {
+ public:
+  GraspableObjectFilter(const rclcpp::NodeOptions& options) : Node("graspable_object_filter", options) {
     // Pointcloud filter parameters
     this->declare_parameter("clip_distance", 0.5);
     this->declare_parameter("ground_height", 0.01);
@@ -56,10 +52,6 @@ public:
     this->declare_parameter("min_cluster_height", 0.01);
     this->declare_parameter("max_obb_dimension", 0.15);
 
-    // Arm base position in base_link (from URDF link0 origin)
-    this->declare_parameter("arm_base_x", 0.07425);
-    this->declare_parameter("arm_base_y", 0.076);
-
     // Performance parameters
     this->declare_parameter("process_every_n_frames", 3);
     this->declare_parameter("voxel_leaf_size", 0.005);
@@ -68,11 +60,15 @@ public:
     this->declare_parameter("log_level", "info");
     auto log_level = this->get_parameter("log_level").as_string();
     int severity = RCUTILS_LOG_SEVERITY_INFO;
-    if (log_level == "debug") severity = RCUTILS_LOG_SEVERITY_DEBUG;
-    else if (log_level == "warn") severity = RCUTILS_LOG_SEVERITY_WARN;
-    else if (log_level == "error") severity = RCUTILS_LOG_SEVERITY_ERROR;
-    else if (log_level == "fatal") severity = RCUTILS_LOG_SEVERITY_FATAL;
-    (void)rcutils_logging_set_logger_level(this->get_logger().get_name(), severity);
+    if (log_level == "debug")
+      severity = RCUTILS_LOG_SEVERITY_DEBUG;
+    else if (log_level == "warn")
+      severity = RCUTILS_LOG_SEVERITY_WARN;
+    else if (log_level == "error")
+      severity = RCUTILS_LOG_SEVERITY_ERROR;
+    else if (log_level == "fatal")
+      severity = RCUTILS_LOG_SEVERITY_FATAL;
+    [[maybe_unused]] auto rc = rcutils_logging_set_logger_level(this->get_logger().get_name(), severity);
 
     // Get parameters
     clip_distance_ = this->get_parameter("clip_distance").as_double();
@@ -89,9 +85,6 @@ public:
     min_cluster_height_ = this->get_parameter("min_cluster_height").as_double();
     max_obb_dimension_ = this->get_parameter("max_obb_dimension").as_double();
 
-    arm_base_x_ = this->get_parameter("arm_base_x").as_double();
-    arm_base_y_ = this->get_parameter("arm_base_y").as_double();
-
     process_every_n_frames_ = this->get_parameter("process_every_n_frames").as_int();
     voxel_leaf_size_ = this->get_parameter("voxel_leaf_size").as_double();
 
@@ -101,24 +94,22 @@ public:
 
     // Subscribers
     cloud_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-      "/pointcloud", 10, std::bind(&GraspProposal::pointcloud_callback, this, std::placeholders::_1));
+        "/pointcloud", 10, std::bind(&GraspableObjectFilter::pointcloud_callback, this, std::placeholders::_1));
 
     // Publishers
     processed_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("~/processed_points", 10);
     cluster_marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>("~/cluster_markers", 10);
-    grasp_proposals_pub_ = this->create_publisher<geometry_msgs::msg::PoseArray>("~/proposals", 10);
 
-    RCLCPP_INFO(this->get_logger(), "GraspProposal initialized");
+    RCLCPP_INFO(this->get_logger(), "GraspableObjectFilter initialized");
   }
 
-private:
+ private:
   // Subscribers
   rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr cloud_sub_;
 
   // Publishers
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr processed_cloud_pub_;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr cluster_marker_pub_;
-  rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr grasp_proposals_pub_;
 
   // TF
   std::string base_frame_;
@@ -141,17 +132,12 @@ private:
   double min_cluster_height_;
   double max_obb_dimension_;
 
-  // Arm base position
-  double arm_base_x_;
-  double arm_base_y_;
-
   // Performance
   int process_every_n_frames_;
   int frame_counter_ = 0;
   double voxel_leaf_size_;
 
-  void pointcloud_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
-  {
+  void pointcloud_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg) {
     if (++frame_counter_ < process_every_n_frames_) {
       return;
     }
@@ -193,13 +179,13 @@ private:
     sensor_msgs::msg::PointCloud2 cloud_transformed;
     try {
       if (!pcl_ros::transformPointCloud(base_frame_, cloud_clipped_msg, cloud_transformed, *tf_buffer_)) {
-        RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 5000,
-                             "Could not transform pointcloud to %s", base_frame_.c_str());
+        RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 5000, "Could not transform pointcloud to %s",
+                             base_frame_.c_str());
         return;
       }
     } catch (const tf2::TransformException& ex) {
-      RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 5000,
-                           "TF error transforming to %s: %s", base_frame_.c_str(), ex.what());
+      RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 5000, "TF error transforming to %s: %s",
+                           base_frame_.c_str(), ex.what());
       return;
     }
 
@@ -236,35 +222,26 @@ private:
       cluster_marker_pub_->publish(empty_markers);
 
       RCLCPP_DEBUG_THROTTLE(this->get_logger(), *this->get_clock(), 5000,
-        "TIMING: %.1fms (preprocess=%.1f cluster=%.1f) | pts: %zu->%zu->%zu | NO CLUSTERS",
-        preprocess_ms + cluster_ms, preprocess_ms, cluster_ms, input_points, after_voxel, after_ground);
+                            "TIMING: %.1fms (preprocess=%.1f cluster=%.1f) | pts: %zu->%zu->%zu | NO CLUSTERS",
+                            preprocess_ms + cluster_ms, preprocess_ms, cluster_ms, input_points, after_voxel,
+                            after_ground);
       return;
     }
 
     filterGraspableClusters(clusters);
-
-    // Publish grasp proposals for all graspable clusters
-    geometry_msgs::msg::PoseArray proposals;
-    proposals.header.frame_id = base_frame_;
-    proposals.header.stamp = msg->header.stamp;
-    for (const auto& cluster : clusters) {
-      if (!cluster.is_graspable) continue;
-      proposals.poses.push_back(computeGraspPose(cluster));
-    }
-    grasp_proposals_pub_->publish(proposals);
 
     auto markers = createClusterMarkers(clusters, msg->header.stamp);
     cluster_marker_pub_->publish(markers);
 
     auto t_end = std::chrono::high_resolution_clock::now();
     double total_ms = std::chrono::duration<double, std::milli>(t_end - t_start).count();
-    RCLCPP_DEBUG_THROTTLE(this->get_logger(), *this->get_clock(), 5000,
-      "TIMING: %.1fms (preprocess=%.1f cluster=%.1f) | pts: %zu->%zu->%zu | %zu clusters, %zu graspable",
-      total_ms, preprocess_ms, cluster_ms, input_points, after_voxel, after_ground, clusters.size(), proposals.poses.size());
+    RCLCPP_DEBUG_THROTTLE(
+        this->get_logger(), *this->get_clock(), 5000,
+        "TIMING: %.1fms (preprocess=%.1f cluster=%.1f) | pts: %zu->%zu->%zu | %zu clusters, %zu graspable", total_ms,
+        preprocess_ms, cluster_ms, input_points, after_voxel, after_ground, clusters.size(), markers.markers.size());
   }
 
-  std::vector<ClusterInfo> extractAndProcessClusters(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
-  {
+  std::vector<ClusterInfo> extractAndProcessClusters(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud) {
     std::vector<ClusterInfo> clusters;
 
     if (cloud->empty()) {
@@ -328,13 +305,12 @@ private:
       Eigen::Vector2f axis1;
       if (std::abs(cov_xy) > 1e-8) {
         double lambda1 = trace / 2.0 + disc;
-        axis1 = Eigen::Vector2f(static_cast<float>(cov_xy),
-                                static_cast<float>(lambda1 - cov_xx)).normalized();
+        axis1 = Eigen::Vector2f(static_cast<float>(cov_xy), static_cast<float>(lambda1 - cov_xx)).normalized();
       } else {
         // Already axis-aligned, pick the axis with larger variance
         axis1 = (cov_xx >= cov_yy) ? Eigen::Vector2f(1, 0) : Eigen::Vector2f(0, 1);
       }
-      Eigen::Vector2f axis2(-axis1.y(), axis1.x()); // perpendicular
+      Eigen::Vector2f axis2(-axis1.y(), axis1.x());  // perpendicular
 
       // Project points onto PCA axes to get extents
       float min_a1 = std::numeric_limits<float>::max(), max_a1 = std::numeric_limits<float>::lowest();
@@ -362,10 +338,9 @@ private:
       info.is_graspable = false;
 
       // OBB center: centroid + offset along PCA axes
-      info.obb_position = Eigen::Vector3f(
-        cx + center_offset1 * axis1.x() + center_offset2 * axis2.x(),
-        cy + center_offset1 * axis1.y() + center_offset2 * axis2.y(),
-        (min_z + max_z) / 2.0f);
+      info.obb_position =
+          Eigen::Vector3f(cx + center_offset1 * axis1.x() + center_offset2 * axis2.x(),
+                          cy + center_offset1 * axis1.y() + center_offset2 * axis2.y(), (min_z + max_z) / 2.0f);
 
       info.obb_dimensions = Eigen::Vector3f(extent1, extent2, max_z - min_z);
       info.yaw = std::atan2(axis1.y(), axis1.x());
@@ -382,8 +357,7 @@ private:
     return clusters;
   }
 
-  void filterGraspableClusters(std::vector<ClusterInfo>& clusters)
-  {
+  void filterGraspableClusters(std::vector<ClusterInfo>& clusters) {
     const double max_grasp_width = gripper_width_ * gripper_width_factor_;
 
     for (auto& c : clusters) {
@@ -415,72 +389,9 @@ private:
     }
   }
 
-  geometry_msgs::msg::Pose computeGraspPose(const ClusterInfo& cluster)
-  {
-    // OBB has two horizontal axes:
-    //   axis1 at angle yaw with extent obb_dimensions.x()
-    //   axis2 at angle yaw+π/2 with extent obb_dimensions.y()
-    // Y (fingers) should straddle the smaller extent
-    // Z (approach) should be along the perpendicular OBB axis
-    float finger_angle, approach_angle;
-    if (cluster.obb_dimensions.x() <= cluster.obb_dimensions.y()) {
-      finger_angle = cluster.yaw;
-      approach_angle = cluster.yaw + static_cast<float>(M_PI_2);
-    } else {
-      finger_angle = cluster.yaw + static_cast<float>(M_PI_2);
-      approach_angle = cluster.yaw;
-    }
-
-    // Pick the approach direction along the OBB axis that faces the arm
-    float dx = cluster.obb_position.x() - static_cast<float>(arm_base_x_);
-    float dy = cluster.obb_position.y() - static_cast<float>(arm_base_y_);
-    float arm_dir = std::atan2(dy, dx);
-
-    float diff = approach_angle - arm_dir;
-    while (diff > M_PI) diff -= 2.0f * static_cast<float>(M_PI);
-    while (diff < -M_PI) diff += 2.0f * static_cast<float>(M_PI);
-    if (std::abs(diff) > M_PI_2) {
-      approach_angle += static_cast<float>(M_PI);
-    }
-
-    // Construct TCP frame aligned with OBB
-    //   Z = approach (along OBB larger axis, toward object from arm side)
-    //   Y = finger opening (along OBB smaller axis)
-    //   X = Y × Z (vertical for horizontal approach)
-    Eigen::Vector3f z_axis(std::cos(approach_angle), std::sin(approach_angle), 0.0f);
-    Eigen::Vector3f y_axis(std::cos(finger_angle), std::sin(finger_angle), 0.0f);
-    Eigen::Vector3f x_axis = y_axis.cross(z_axis);
-
-    // Ensure right-handed with X pointing down (consistent with arm plane)
-    if (x_axis.z() > 0) {
-      y_axis = -y_axis;
-      x_axis = -x_axis;
-    }
-
-    Eigen::Matrix3f rot;
-    rot.col(0) = x_axis;
-    rot.col(1) = y_axis;
-    rot.col(2) = z_axis;
-    Eigen::Quaternionf quat(rot);
-
-    geometry_msgs::msg::Pose pose;
-    pose.position.x = cluster.obb_position.x();
-    pose.position.y = cluster.obb_position.y();
-    pose.position.z = cluster.obb_position.z();
-    pose.orientation.x = quat.x();
-    pose.orientation.y = quat.y();
-    pose.orientation.z = quat.z();
-    pose.orientation.w = quat.w();
-
-    return pose;
-  }
-
-  visualization_msgs::msg::MarkerArray createClusterMarkers(
-      const std::vector<ClusterInfo>& clusters,
-      const rclcpp::Time& stamp)
-  {
+  visualization_msgs::msg::MarkerArray createClusterMarkers(const std::vector<ClusterInfo>& clusters,
+                                                            const rclcpp::Time& stamp) {
     visualization_msgs::msg::MarkerArray marker_array;
-    marker_array.markers.reserve(clusters.size() + 1);
 
     visualization_msgs::msg::Marker delete_marker;
     delete_marker.header.frame_id = base_frame_;
@@ -493,7 +404,8 @@ private:
       visualization_msgs::msg::Marker marker;
       marker.header.frame_id = base_frame_;
       marker.header.stamp = stamp;
-      marker.ns = "cluster_obb";
+      // ns used by grasp_aggregator to filter graspable objects semantically
+      marker.ns = cluster.is_graspable ? "graspable" : "rejected";
       marker.id = cluster.cluster_id;
       marker.type = visualization_msgs::msg::Marker::CUBE;
       marker.action = visualization_msgs::msg::Marker::ADD;
@@ -531,7 +443,7 @@ private:
   }
 };
 
-} // namespace kiwi_perception
+}  // namespace kiwi_perception
 
 #include "rclcpp_components/register_node_macro.hpp"
-RCLCPP_COMPONENTS_REGISTER_NODE(kiwi_perception::GraspProposal)
+RCLCPP_COMPONENTS_REGISTER_NODE(kiwi_perception::GraspableObjectFilter)
